@@ -1,4 +1,6 @@
 export const SITE = {
+  /** Canonical production domain (Vercel custom domain). */
+  url: "https://www.sultanharamaingresik.com",
   company: "PT Sultan Barokah Haramain",
   branch: "Kantor Cabang Gresik",
   ppiu: "04042300022560003",
