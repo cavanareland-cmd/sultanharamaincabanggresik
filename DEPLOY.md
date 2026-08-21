@@ -113,3 +113,22 @@ Your live URL will be `https://<your-repo>.vercel.app`. Add a custom domain in
   for the one-time claim.
 - **404 on deep links / refresh** → ensure the Vercel project built successfully
   (`.vercel/output` present). TanStack Start routing needs no extra config.
+
+---
+
+## 5. Custom domain (live)
+
+Production domain: **https://www.sultanharamaingresik.com/**
+
+- Added in **Vercel → Project → Settings → Domains**, with `sultanharamaingresik.com`
+  redirecting to the `www` host.
+- The canonical URL is centralised in `src/lib/site.ts` (`SITE.url`) and used for
+  `<link rel="canonical">`, `og:url`, and the `TravelAgency` JSON-LD on the homepage.
+- `public/robots.txt` points crawlers at `https://www.sultanharamaingresik.com/sitemap.xml`,
+  and `public/sitemap.xml` lists the homepage.
+
+If the domain ever changes, update `SITE.url`, `public/robots.txt`, and
+`public/sitemap.xml` — nothing else hardcodes the host.
+
+> The Lovable preview and `sultanharamaincabanggresik.lovable.app` keep working; they
+> just declare the Vercel domain as canonical so Google indexes one URL only.
