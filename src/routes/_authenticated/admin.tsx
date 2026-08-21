@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { LogOut, Plus, Save, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -14,6 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
+import { claimFirstAdmin } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -128,16 +130,16 @@ function AdminPage() {
   const queryClient = useQueryClient();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
+  const checkAdmin = useServerFn(claimFirstAdmin);
+
   useEffect(() => {
-    void supabase.rpc("claim_first_admin").then(({ data, error }) => {
-      if (error) {
-        toast.error(error.message);
+    void checkAdmin()
+      .then((result) => setIsAdmin(result.isAdmin))
+      .catch((error: unknown) => {
+        toast.error(error instanceof Error ? error.message : "Gagal memuat akses admin.");
         setIsAdmin(false);
-        return;
-      }
-      setIsAdmin(Boolean(data));
-    });
-  }, []);
+      });
+  }, [checkAdmin]);
 
   const packagesQuery = useQuery({
     queryKey: ["admin-packages"],
