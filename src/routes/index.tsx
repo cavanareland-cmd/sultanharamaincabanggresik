@@ -22,6 +22,8 @@ const TITLE = "Travel Umrah Gresik Resmi | Sultan Haramain";
 const DESCRIPTION =
   "Paket Umrah mewah & terpercaya dari PT Sultan Barokah Haramain Cabang Gresik. Izin PPIU 04042300022560003. Hotel dekat Haramain, muthawwif berpengalaman.";
 
+const CANONICAL = `${SITE.url}/`;
+
 export const Route = createFileRoute("/")({
   loader: ({ context }) => context.queryClient.ensureQueryData(homeQuery),
   head: () => ({
@@ -30,8 +32,32 @@ export const Route = createFileRoute("/")({
       { name: "description", content: DESCRIPTION },
       { property: "og:title", content: TITLE },
       { property: "og:description", content: DESCRIPTION },
+      { property: "og:url", content: CANONICAL },
+      { property: "og:site_name", content: `${SITE.company} ${SITE.branch}` },
+    ],
+    links: [{ rel: "canonical", href: CANONICAL }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "TravelAgency",
+          name: `${SITE.company} - ${SITE.branch}`,
+          url: CANONICAL,
+          telephone: `+${SITE.phoneIntl}`,
+          address: {
+            "@type": "PostalAddress",
+            streetAddress: "Jl. Samanhudi No. 37",
+            addressLocality: "Gresik",
+            addressRegion: "Jawa Timur",
+            addressCountry: "ID",
+          },
+          sameAs: [SITE.instagram, SITE.facebook, SITE.tiktok],
+        }),
+      },
     ],
   }),
+
   component: Home,
   errorComponent: ({ error }) => (
     <div className="flex min-h-screen items-center justify-center p-6 text-center" role="alert">
