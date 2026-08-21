@@ -15,7 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
-import { claimFirstAdmin } from "@/lib/admin.functions";
+import { checkIsAdmin, claimFirstAdmin } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -130,16 +130,40 @@ function AdminPage() {
   const queryClient = useQueryClient();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
-  const checkAdmin = useServerFn(claimFirstAdmin);
+  const verifyAdmin = useServerFn(checkIsAdmin);
+  const claimAdmin = useServerFn(claimFirstAdmin);
 
-  useEffect(() => {
-    void checkAdmin()
+  const runVerify = () =>
+    void verifyAdmin()
       .then((result) => setIsAdmin(result.isAdmin))
       .catch((error: unknown) => {
         toast.error(error instanceof Error ? error.message : "Gagal memuat akses admin.");
         setIsAdmin(false);
       });
-  }, [checkAdmin]);
+
+  useEffect(() => {
+    runVerify();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleClaimAdmin = async () => {
+    try {
+      const result = await claimAdmin();
+      if (result.isAdmin) {
+        toast.success("Akses admin berhasil diklaim.");
+        runVerify();
+      } else {
+        toast.error("Akses admin tidak dapat diklaim. Hubungi admin utama.");
+        setIsAdmin(false);
+      }
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Gagal mengklaim admin. Lakukan klaim pertama dari preview Lovable.",
+      );
+    }
+  };
 
   const packagesQuery = useQuery({
     queryKey: ["admin-packages"],
@@ -214,9 +238,15 @@ function AdminPage() {
 
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
         {isAdmin === false ? (
-          <p className="mb-6 rounded-xl border border-destructive/50 bg-destructive/10 p-4 text-sm">
-            Akun ini belum memiliki akses admin. Hubungi admin utama untuk diberi akses.
-          </p>
+          <div className="mb-6 space-y-3 rounded-xl border border-destructive/50 bg-destructive/10 p-4 text-sm">
+            <p>
+              Akun ini belum memiliki akses admin. Jika ini akun pertama, klaim akses admin di
+              bawah (dilakukan dari preview Lovable). Hubungi admin utama untuk diberi akses.
+            </p>
+            <Button variant="gold" size="sm" onClick={handleClaimAdmin}>
+              Klaim Akses Admin
+            </Button>
+          </div>
         ) : null}
 
         <Tabs defaultValue="packages">
