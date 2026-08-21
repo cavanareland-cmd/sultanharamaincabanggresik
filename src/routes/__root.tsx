@@ -86,6 +86,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "PT Sultan Barokah Haramain Cabang Gresik - travel Umrah resmi berizin PPIU 04042300022560003.",
       },
       { name: "author", content: "PT Sultan Barokah Haramain" },
+      {
+        name: "google-site-verification",
+        content: "Xg5D-Jp9nevu1DYc1xSUUCKqBgsefRdK0n26CNVKBJI",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
