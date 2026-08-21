@@ -128,16 +128,16 @@ function AdminPage() {
   const queryClient = useQueryClient();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
+  const checkAdmin = useServerFn(claimFirstAdmin);
+
   useEffect(() => {
-    void supabase.rpc("claim_first_admin").then(({ data, error }) => {
-      if (error) {
-        toast.error(error.message);
+    void checkAdmin()
+      .then((result) => setIsAdmin(result.isAdmin))
+      .catch((error: unknown) => {
+        toast.error(error instanceof Error ? error.message : "Gagal memuat akses admin.");
         setIsAdmin(false);
-        return;
-      }
-      setIsAdmin(Boolean(data));
-    });
-  }, []);
+      });
+  }, [checkAdmin]);
 
   const packagesQuery = useQuery({
     queryKey: ["admin-packages"],
