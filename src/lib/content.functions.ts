@@ -32,6 +32,12 @@ export type UmrahPackage = {
   sort_order: number;
 };
 
+export type GalleryImageRow = {
+  id: string;
+  image_url: string;
+  caption: string;
+};
+
 export type SiteContentMap = Record<string, string>;
 
 function serverClient() {
@@ -54,13 +60,17 @@ function serverClient() {
 
 export const getHomeContent = createServerFn({ method: "GET" }).handler(async () => {
   const supabase = serverClient();
-  const [packagesRes, contentRes] = await Promise.all([
+  const [packagesRes, contentRes, galleryRes] = await Promise.all([
     supabase
       .from("packages")
       .select("*")
       .eq("is_published", true)
       .order("sort_order", { ascending: true }),
     supabase.from("site_content").select("key, value"),
+    supabase
+      .from("gallery_images")
+      .select("id, image_url, caption")
+      .order("sort_order", { ascending: true }),
   ]);
 
   const packages: UmrahPackage[] = (packagesRes.data ?? []).map((row) => ({
@@ -88,5 +98,11 @@ export const getHomeContent = createServerFn({ method: "GET" }).handler(async ()
   const content: SiteContentMap = {};
   for (const row of contentRes.data ?? []) content[row.key] = row.value;
 
-  return { packages, content };
+  const gallery: GalleryImageRow[] = (galleryRes.data ?? []).map((row) => ({
+    id: row.id,
+    image_url: row.image_url,
+    caption: row.caption ?? "",
+  }));
+
+  return { packages, content, gallery };
 });

@@ -22,6 +22,7 @@ export const NAV_LINKS = [
   { label: "Beranda", hash: "#beranda" },
   { label: "Paket Umrah", hash: "#paket" },
   { label: "Keunggulan", hash: "#keunggulan" },
+  { label: "Galeri", hash: "#galeri" },
   { label: "Testimoni", hash: "#testimoni" },
   { label: "Kontak", hash: "#kontak" },
 ] as const;

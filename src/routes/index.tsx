@@ -4,6 +4,7 @@ import { MessageCircle } from "lucide-react";
 
 import { Advantages } from "@/components/site/Advantages";
 import { Footer } from "@/components/site/Footer";
+import { Gallery } from "@/components/site/Gallery";
 import { Hero } from "@/components/site/Hero";
 import { Navbar } from "@/components/site/Navbar";
 import { PackagesSection } from "@/components/site/PackagesSection";
@@ -69,6 +70,7 @@ function Home() {
         <PackagesSection packages={data.packages} />
         <Advantages />
         <TrustBanner />
+        <Gallery images={data.gallery} />
         <Testimonials />
       </main>
 
