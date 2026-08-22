@@ -15,7 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
-import { checkIsAdmin, claimFirstAdmin } from "@/lib/admin.functions";
+import { claimFirstAdmin } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -169,7 +169,7 @@ function AdminPage() {
       const result = await claimAdmin();
       if (result.isAdmin) {
         toast.success("Akses admin berhasil diklaim.");
-        runVerify();
+        void runVerify();
       } else {
         toast.error("Akses admin tidak dapat diklaim. Hubungi admin utama.");
         setIsAdmin(false);
