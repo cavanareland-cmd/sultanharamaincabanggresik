@@ -131,6 +131,16 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="id">
       <head>
         <HeadContent />
+        {/* Google Search Console: custom domain (www.sultanharamaingresik.com) */}
+        <meta
+          name="google-site-verification"
+          content="Xg5D-Jp9nevu1DYc1xSUUCKqBgsefRdK0n26CNVKBJI"
+        />
+        {/* Google Search Console: Lovable published domain */}
+        <meta
+          name="google-site-verification"
+          content="011ajmX1hiOx6oAsa3y5SFckDzr4hS-cSnrvOpcW3fg"
+        />
       </head>
       <body>
         {children}
