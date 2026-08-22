@@ -86,15 +86,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "PT Sultan Barokah Haramain Cabang Gresik - travel Umrah resmi berizin PPIU 04042300022560003.",
       },
       { name: "author", content: "PT Sultan Barokah Haramain" },
-      {
-        name: "google-site-verification",
-        content: "Xg5D-Jp9nevu1DYc1xSUUCKqBgsefRdK0n26CNVKBJI",
-      },
-      {
-        name: "google-site-verification-lovable",
-        property: "google-site-verification",
-        content: "011ajmX1hiOx6oAsa3y5SFckDzr4hS-cSnrvOpcW3fg",
-      },
+      // Search Console verification tags are rendered as literal <meta> elements in
+      // RootShell — the head manager dedupes entries that share the same `name`,
+      // which would drop one of the two tokens.
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
