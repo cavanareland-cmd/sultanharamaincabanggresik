@@ -132,3 +132,37 @@ If the domain ever changes, update `SITE.url`, `public/robots.txt`, and
 
 > The Lovable preview and `sultanharamaincabanggresik.lovable.app` keep working; they
 > just declare the Vercel domain as canonical so Google indexes one URL only.
+
+---
+
+## 6. Sync checklist (Lovable → GitHub → Vercel)
+
+Everything below is verified in the current codebase; use it as the go-live check.
+
+| Layer | Source of truth | Notes |
+| --- | --- | --- |
+| Database (packages, site_content, gallery_images, user_roles) | Lovable Cloud | Shared by the Lovable preview *and* Vercel — one dataset, no copies. |
+| Public content reads | `src/lib/content.functions.ts` (`getHomeContent`) | Publishable key only, via public `SELECT` policies. |
+| CMS writes | `/admin` (browser client + RLS) | Admin-only policies check `user_roles`. |
+| Auth / login | `/auth` (email + password) | Sessions are stored per browser; the same credentials work on both domains. |
+| Admin credential | first account that clicks **Klaim Akses Admin** in the Lovable preview | Row persists in the database, so the same login is admin on Vercel. |
+| Frontend pages/components | `src/routes/*`, `src/components/site/*` | Single codebase — GitHub two-way sync pushes it to Vercel. |
+| Canonical host | `src/lib/site.ts` → `SITE.url` | Also drives `robots.txt` + `sitemap.xml`. |
+| Search Console tags | `src/routes/__root.tsx` (`RootShell`) | Two literal `<meta name="google-site-verification">` tags (custom domain + Lovable domain). |
+
+### Environment variables win over `.env`
+
+The repo contains a Lovable-managed `.env`. Values you set in
+**Vercel → Settings → Environment Variables** override it at build and runtime,
+so always set the six variables from step 3 in Vercel explicitly instead of
+relying on the committed file.
+
+> Keep the GitHub repository **private**: the Lovable-managed `.env` is committed
+> and may contain server-side keys.
+
+### After every Lovable change
+
+1. Lovable pushes to GitHub `main` automatically (two-way sync).
+2. Vercel builds that commit and updates `https://www.sultanharamaingresik.com/`.
+3. Content edited in `/admin` needs **no** redeploy — it is read from the
+   database on every request.
