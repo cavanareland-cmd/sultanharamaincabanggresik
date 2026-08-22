@@ -130,21 +130,39 @@ function AdminPage() {
   const queryClient = useQueryClient();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
-  const verifyAdmin = useServerFn(checkIsAdmin);
   const claimAdmin = useServerFn(claimFirstAdmin);
 
-  const runVerify = () =>
-    void verifyAdmin()
-      .then((result) => setIsAdmin(result.isAdmin))
-      .catch((error: unknown) => {
-        toast.error(error instanceof Error ? error.message : "Gagal memuat akses admin.");
-        setIsAdmin(false);
-      });
+  /**
+   * Admin check runs in the browser against `user_roles` using the signed-in
+   * session (RLS: users can read their own roles). This works identically on the
+   * Lovable preview and on self-hosted Vercel, with no server env vars needed.
+   */
+  const runVerify = async () => {
+    const { data: session } = await supabase.auth.getSession();
+    const userId = session.session?.user.id;
+    if (!userId) {
+      setIsAdmin(false);
+      return;
+    }
+    const { data, error } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .eq("role", "admin")
+      .maybeSingle();
+    if (error) {
+      toast.error("Tidak dapat memverifikasi akses admin.");
+      setIsAdmin(false);
+      return;
+    }
+    setIsAdmin(Boolean(data));
+  };
 
   useEffect(() => {
-    runVerify();
+    void runVerify();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
 
   const handleClaimAdmin = async () => {
     try {
