@@ -12,6 +12,10 @@ export const SITE = {
   tiktok: "https://tiktok.com/@sultanharamaingresik",
   mapsEmbed:
     "https://www.google.com/maps?q=Jl.%20Samanhudi%20No.%2037%20Gresik%20Jawa%20Timur&output=embed",
+  careers: {
+    email: "karir@sultanharamaingresik.com",
+    role: "Social Media & Admin Officer",
+  },
 } as const;
 
 /** WhatsApp deep link with a pre-filled question about a package/topic. */
@@ -20,11 +24,23 @@ export function waLink(topic = "paket umrah") {
   return `https://wa.me/${SITE.phoneIntl}?text=${encodeURIComponent(text)}`;
 }
 
+/** WhatsApp apply link; candidate appends their full name after the prefix. */
+export function waApplyLink() {
+  return `https://wa.me/${SITE.phoneIntl}?text=${encodeURIComponent("LAMAR_ADMIN_GRESIK_")}`;
+}
+
+export function careersMailto() {
+  const subject = `Lamaran ${SITE.careers.role} — Kantor Cabang Gresik`;
+  const body = `Assalamu'alaikum,\n\nSaya ingin mengirim lamaran untuk posisi ${SITE.careers.role} di ${SITE.branch}.\nTerlampir CV terbaru, portofolio kreatif/desain, dan pas foto terbaru.\n\nNama lengkap:\nDomisili:\n`;
+  return `mailto:${SITE.careers.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+
 export const NAV_LINKS = [
-  { label: "Beranda", hash: "#beranda" },
-  { label: "Paket Umrah", hash: "#paket" },
-  { label: "Keunggulan", hash: "#keunggulan" },
-  { label: "Galeri", hash: "#galeri" },
-  { label: "Testimoni", hash: "#testimoni" },
-  { label: "Kontak", hash: "#kontak" },
+  { label: "Beranda", href: "/#beranda" },
+  { label: "Paket Umrah", href: "/#paket" },
+  { label: "Keunggulan", href: "/#keunggulan" },
+  { label: "Galeri", href: "/#galeri" },
+  { label: "Testimoni", href: "/#testimoni" },
+  { label: "Kontak", href: "/#kontak" },
+  { label: "Karir", href: "/karir" },
 ] as const;

@@ -86,7 +86,7 @@ export function Footer({ content }: { content: SiteContentMap }) {
           </Button>
           <nav className="mt-6 flex flex-wrap gap-x-4 gap-y-2 text-sm">
             {NAV_LINKS.map((link) => (
-              <a key={link.hash} href={link.hash} className="text-muted-foreground hover:text-gold">
+              <a key={link.href} href={link.href} className="text-muted-foreground hover:text-gold">
                 {link.label}
               </a>
             ))}

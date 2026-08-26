@@ -34,8 +34,8 @@ export function Navbar() {
         <nav className="hidden items-center gap-7 lg:flex">
           {NAV_LINKS.map((link) => (
             <a
-              key={link.hash}
-              href={link.hash}
+              key={link.href}
+              href={link.href}
               className="text-sm font-medium text-foreground/80 transition-colors hover:text-gold"
             >
               {link.label}
@@ -64,8 +64,8 @@ export function Navbar() {
               <nav className="mt-6 flex flex-col gap-1">
                 {NAV_LINKS.map((link) => (
                   <a
-                    key={link.hash}
-                    href={link.hash}
+                    key={link.href}
+                    href={link.href}
                     onClick={() => setOpen(false)}
                     className="rounded-lg px-3 py-3 text-base font-medium text-foreground/85 transition-colors hover:bg-accent hover:text-gold"
                   >
