@@ -55,6 +55,49 @@ export const Route = createFileRoute("/")({
           sameAs: [SITE.instagram, SITE.facebook, SITE.tiktok],
         }),
       },
+      ...((loaderData?.packages ?? []).length
+        ? [
+            {
+              type: "application/ld+json",
+              children: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "ItemList",
+                name: "Paket Umrah Sultan Haramain Gresik",
+                itemListElement: (loaderData?.packages ?? []).map((pkg, index) => ({
+                  "@type": "ListItem",
+                  position: index + 1,
+                  item: {
+                    "@type": "Product",
+                    name: pkg.title,
+                    description:
+                      pkg.notes ||
+                      [
+                        pkg.duration_days ? `${pkg.duration_days} hari` : "",
+                        pkg.departure_city ? `keberangkatan ${pkg.departure_city}` : "",
+                        pkg.hotel_makkah ? `Hotel Makkah ${pkg.hotel_makkah}` : "",
+                        pkg.hotel_madinah ? `Hotel Madinah ${pkg.hotel_madinah}` : "",
+                      ]
+                        .filter(Boolean)
+                        .join(", "),
+                    url: CANONICAL,
+                    brand: { "@type": "Brand", name: `${SITE.company} ${SITE.branch}` },
+                    ...(pkg.price_numeric
+                      ? {
+                          offers: {
+                            "@type": "Offer",
+                            price: pkg.price_numeric,
+                            priceCurrency: "IDR",
+                            availability: "https://schema.org/InStock",
+                            url: CANONICAL,
+                          },
+                        }
+                      : {}),
+                  },
+                })),
+              }),
+            },
+          ]
+        : []),
     ],
   }),
 
