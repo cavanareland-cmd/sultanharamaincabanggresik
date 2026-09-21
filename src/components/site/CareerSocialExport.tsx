@@ -8,6 +8,9 @@ import {
   Linkedin,
   MonitorDown,
   Smartphone,
+  Sparkles,
+  MapPin,
+  MessageCircle,
 } from "lucide-react";
 
 import heroImage from "@/assets/hero-haramain.jpg";
@@ -260,7 +263,7 @@ export function CareerSocialExport() {
         </div>
 
         <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
-          <div className="rounded-3xl border border-border/70 bg-background/60 p-5 shadow-deep sm:p-7">
+          <div className="rounded-[2rem] border border-border/70 bg-background/60 p-5 shadow-deep sm:p-7">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-sm font-semibold text-foreground">Preview</p>
@@ -276,7 +279,7 @@ export function CareerSocialExport() {
 
             <div className="mt-5 flex min-h-[360px] items-center justify-center overflow-hidden rounded-2xl border border-border/60 bg-muted/20 p-4">
               <div
-                className="w-full max-w-[620px] overflow-hidden rounded-xl shadow-deep"
+                className="w-full max-w-[620px] overflow-hidden rounded-[1.5rem] border border-gold/20 bg-[#071a2d] p-2 shadow-deep"
                 style={{ aspectRatio: `${selected.width} / ${selected.height}` }}
               >
                 <img
@@ -288,8 +291,16 @@ export function CareerSocialExport() {
             </div>
           </div>
 
-          <aside className="rounded-3xl border border-border/70 bg-background/80 p-5 shadow-deep sm:p-6">
-            <h3 className="font-display text-xl font-semibold">Pilih Format</h3>
+          <aside className="rounded-[2rem] border border-border/70 bg-background/80 p-5 shadow-deep sm:p-6">
+            <div className="flex items-start gap-3">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-gold/10 text-gold">
+                <Sparkles className="size-5" />
+              </span>
+              <div>
+                <h3 className="font-display text-xl font-semibold">Pilih Format</h3>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Preset premium navy · gold · white, dioptimalkan untuk setiap rasio.</p>
+              </div>
+            </div>
             <div className="mt-5 space-y-3">
               {FORMATS.map((format) => {
                 const Icon = format.icon;
@@ -303,10 +314,10 @@ export function CareerSocialExport() {
                       setSelectedId(format.id);
                       setStatus("");
                     }}
-                    className={`flex w-full items-center gap-3 rounded-2xl border p-4 text-left transition-colors ${
+                    className={`group flex w-full items-center gap-3 rounded-2xl border p-4 text-left transition-all ${
                       active
-                        ? "border-gold bg-gold/10"
-                        : "border-border/70 bg-background/40 hover:border-gold/50"
+                        ? "border-gold bg-gold/10 shadow-[0_10px_30px_rgba(216,173,82,0.08)]"
+                        : "border-border/70 bg-background/40 hover:-translate-y-0.5 hover:border-gold/50 hover:bg-gold/[0.04]"
                     }`}
                   >
                     <span className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${
@@ -324,10 +335,23 @@ export function CareerSocialExport() {
               })}
             </div>
 
+            <div className="mt-6 grid grid-cols-2 gap-3 text-xs text-muted-foreground">
+              <div className="rounded-2xl border border-border/60 bg-muted/20 p-3">
+                <MapPin className="mb-2 size-4 text-gold" />
+                <span className="font-medium text-foreground">Gresik</span>
+                <span className="mt-0.5 block">On-site · Full-time</span>
+              </div>
+              <div className="rounded-2xl border border-border/60 bg-muted/20 p-3">
+                <MessageCircle className="mb-2 size-4 text-[#168a4b]" />
+                <span className="font-medium text-foreground">WhatsApp</span>
+                <span className="mt-0.5 block">Siap dibagikan</span>
+              </div>
+            </div>
+
             <Button
               type="button"
               size="lg"
-              className="mt-6 w-full"
+              className="mt-4 w-full rounded-2xl font-semibold shadow-lg"
               onClick={handleExport}
               disabled={busy}
             >
@@ -341,7 +365,12 @@ export function CareerSocialExport() {
               </p>
             ) : null}
 
-            <p className="mt-5 text-xs leading-relaxed text-muted-foreground">
+            <div className="mt-5 rounded-2xl border border-gold/20 bg-gold/[0.04] p-4">
+              <p className="text-xs font-semibold text-foreground">Preset desain</p>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Terinspirasi dari layout recruitment premium Adobe Express: headline kuat, whitespace lega, aksen gold, dan CTA kontras.</p>
+            </div>
+
+            <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
               Export dibuat langsung di browser Anda. Data lamaran dan informasi kontak tidak dikirim ke server tambahan.
             </p>
           </aside>
