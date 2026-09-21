@@ -27,13 +27,13 @@ type ExportFormat = {
 };
 
 const DEFAULT_FORMAT: ExportFormat = {
-    id: "instagram-feed",
-    label: "Instagram Feed",
-    subtitle: "1080 × 1080 px · 1:1",
-    width: 1080,
-    height: 1080,
-    platform: "Instagram",
-    icon: Instagram,
+  id: "instagram-feed",
+  label: "Instagram Feed",
+  subtitle: "1080 × 1080 px · 1:1",
+  width: 1080,
+  height: 1080,
+  platform: "Instagram",
+  icon: Instagram,
 };
 
 const FORMATS: ExportFormat[] = [
@@ -116,7 +116,7 @@ function posterToPng(width: number, height: number) {
   });
 }
 export function CareerSocialExport() {
-  const [selectedId, setSelectedId] = useState(FORMATS[0].id);
+  const [selectedId, setSelectedId] = useState(DEFAULT_FORMAT.id);
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState("");
 
