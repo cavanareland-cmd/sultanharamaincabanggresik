@@ -18,8 +18,10 @@ export const Route = createFileRoute("/karir")({
       { name: "description", content: DESCRIPTION },
       { property: "og:title", content: TITLE },
       { property: "og:description", content: DESCRIPTION },
+      { property: "og:type", content: "website" },
       { property: "og:url", content: CANONICAL },
       { property: "og:site_name", content: `${SITE.company} ${SITE.branch}` },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [{ rel: "canonical", href: CANONICAL }],
     scripts: [
