@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { MessageCircle } from "lucide-react";
 
+import { CareerSocialExport } from "@/components/site/CareerSocialExport";
 import { CareersLanding } from "@/components/site/CareersLanding";
 import { Footer } from "@/components/site/Footer";
 import { Navbar } from "@/components/site/Navbar";
@@ -64,6 +65,7 @@ function KarirPage() {
       <Navbar />
       <main>
         <CareersLanding />
+        <CareerSocialExport />
       </main>
       <Footer content={{}} />
       <a
