@@ -148,69 +148,76 @@ function svgToPng(svg: string, width: number, height: number) {
 function buildPosterSvg(format: ExportFormat) {
   const { width, height } = format;
   const isPortrait = height > width;
-  const compact = width <= 1200 && !isPortrait;
-  const padding = isPortrait ? 76 : 68;
-  const titleSize = isPortrait ? 82 : compact ? 64 : 70;
-  const bodySize = isPortrait ? 34 : 28;
-  const cardRadius = isPortrait ? 34 : 28;
-  const maxTitleChars = isPortrait ? 17 : 28;
-  const titleLines = wrapText("Bergabung Bersama Kami", maxTitleChars);
+  const isSquare = width === height;
+  const padding = isPortrait ? 68 : 64;
+  const navy = "#0b2944";
+  const navySoft = "#163d5f";
+  const beige = "#f4efe4";
+  const beigeSoft = "#e9dfcd";
+  const gold = "#c9a24b";
+  const green = "#168a4b";
+  const titleSize = isPortrait ? 76 : isSquare ? 70 : 60;
+  const roleSize = isPortrait ? 42 : isSquare ? 36 : 32;
+  const bodySize = isPortrait ? 27 : 22;
+  const photoHeight = isPortrait ? 500 : 300;
   const role = SITE.careers.role;
+  const email = SITE.careers.email;
+  const phone = SITE.phoneDisplay;
+  const summary = [
+    "Kelola konten media sosial",
+    "Desain dasar Canva / CapCut",
+    "Administrasi & laporan",
+  ];
 
-  const titleY = isPortrait ? 390 : 215;
-  const imageHeight = isPortrait ? 620 : 300;
-  const cardY = isPortrait ? 1060 : 350;
-  const cardHeight = isPortrait ? 500 : 210;
-
-  const titleMarkup = titleLines
-    .map(
-      (line, index) =>
-        `<text x="${padding}" y="${titleY + index * (titleSize + 10)}" font-size="${titleSize}" font-weight="700" fill="#ffffff">${escapeXml(line)}</text>`,
-    )
-    .join("");
-
-  const summaryStart = cardY + (isPortrait ? 88 : 68);
-  const summaryMarkup = RESPONSIBILITY_SUMMARY.map(
-    (item, index) =>
-      `<g transform="translate(${padding + 12}, ${summaryStart + index * (isPortrait ? 88 : 48)})"><circle cx="0" cy="-9" r="11" fill="#d8ad52"/><text x="28" y="0" font-size="${bodySize}" fill="#17304a">${escapeXml(item)}</text></g>`,
+  const titleLines = wrapText("WE'RE HIRING", isPortrait ? 12 : 18);
+  const titleY = isPortrait ? photoHeight + 118 : 122;
+  const roleY = titleY + titleSize + 18;
+  const roleLines = wrapText(role, isPortrait ? 24 : isSquare ? 25 : 34);
+  const roleMarkup = roleLines.map((line, index) =>
+    '<text x="' + padding + '" y="' + (roleY + index * (roleSize + 8)) + '" font-size="' + roleSize + '" font-weight="800" fill="' + navySoft + '">' + escapeXml(line) + '</text>'
+  ).join("");
+  const titleMarkup = titleLines.map((line, index) =>
+    '<text x="' + padding + '" y="' + (titleY + index * (titleSize + 8)) + '" font-size="' + titleSize + '" font-weight="800" letter-spacing="' + (isPortrait ? 1 : 2) + '" fill="' + navy + '">' + escapeXml(line) + '</text>'
   ).join("");
 
-  const footerY = height - (isPortrait ? 150 : 90);
+  const companyY = roleY + roleLines.length * (roleSize + 8) + 30;
+  const summaryY = companyY + 94;
+  const summaryMarkup = summary.map((item, index) =>
+    '<g transform="translate(' + (padding + 24) + ', ' + (summaryY + 50 + index * (bodySize + 22)) + ')"><circle cx="0" cy="-8" r="8" fill="' + gold + '"/><text x="22" y="0" font-size="' + bodySize + '" font-weight="600" fill="' + navy + '">' + escapeXml(item) + '</text></g>'
+  ).join("");
+  const ctaHeight = isPortrait ? 76 : 62;
+  const ctaY = height - padding - ctaHeight;
+  const summaryBoxY = summaryY - 30;
+  const summaryBoxHeight = summary.length * (bodySize + 22) + 88;
+  const footerY = summaryBoxY - 28;
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
-    <defs>
-      <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="#071a2d"/>
-        <stop offset="55%" stop-color="#0d3557"/>
-        <stop offset="100%" stop-color="#071a2d"/>
-      </linearGradient>
-      <linearGradient id="gold" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%" stop-color="#c99535"/>
-        <stop offset="100%" stop-color="#f1d487"/>
-      </linearGradient>
-      <clipPath id="heroClip"><rect x="0" y="0" width="${width}" height="${imageHeight}" rx="0"/></clipPath>
-    </defs>
-    <rect width="${width}" height="${height}" fill="url(#bg)"/>
-    <image href="${escapeXml(heroImage)}" x="0" y="0" width="${width}" height="${imageHeight}" preserveAspectRatio="xMidYMid slice" opacity="0.46" clip-path="url(#heroClip)"/>
-    <rect width="${width}" height="${imageHeight}" fill="#061a2d" opacity="0.38"/>
-    <rect x="${padding}" y="64" width="210" height="56" rx="28" fill="#ffffff" opacity="0.12"/>
-    <image href="${escapeXml(logoAsset.url)}" x="${padding + 12}" y="72" width="40" height="40" preserveAspectRatio="xMidYMid meet"/>
-    <text x="${padding + 64}" y="97" font-size="20" font-weight="700" fill="#ffffff">SULTAN HARAMAIN</text>
-    <text x="${padding + 64}" y="117" font-size="12" fill="#d8ad52">CABANG GRESIK</text>
-    <text x="${padding}" y="${titleY - 70}" font-size="${isPortrait ? 24 : 20}" font-weight="700" letter-spacing="4" fill="#d8ad52">WE&apos;RE HIRING</text>
-    ${titleMarkup}
-    <text x="${padding}" y="${titleY + titleLines.length * (titleSize + 10) + 38}" font-size="${bodySize}" fill="#eef5fb">${escapeXml(role)}</text>
-    <rect x="${padding}" y="${cardY}" width="${width - padding * 2}" height="${cardHeight}" rx="${cardRadius}" fill="#ffffff" opacity="0.98"/>
-    <text x="${padding + 36}" y="${cardY + 54}" font-size="${isPortrait ? 26 : 24}" font-weight="700" fill="#0d3557">Posisi: ${escapeXml(role)}</text>
-    ${summaryMarkup}
-    <rect x="${padding + 36}" y="${cardY + cardHeight - (isPortrait ? 82 : 58)}" width="${width - padding * 2 - 72}" height="${isPortrait ? 58 : 44}" rx="22" fill="#138a4b"/>
-    <text x="${width / 2}" y="${cardY + cardHeight - (isPortrait ? 43 : 29)}" text-anchor="middle" font-size="${isPortrait ? 26 : 21}" font-weight="700" fill="#ffffff">LAMAR SEKARANG · WHATSAPP ${escapeXml(SITE.phoneDisplay)}</text>
-    <text x="${padding}" y="${footerY}" font-size="${isPortrait ? 22 : 18}" fill="#d9e5ee">Wajib berdomisili Gresik · On-site · Full-time</text>
-    <text x="${padding}" y="${footerY + (isPortrait ? 36 : 28)}" font-size="${isPortrait ? 20 : 16}" fill="#b8cbd9">${escapeXml(SITE.url.replace("https://", ""))}/karir</text>
-    <rect x="${width - padding - 190}" y="${footerY - 10}" width="190" height="4" rx="2" fill="url(#gold)"/>
-  </svg>`;
+  return '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '" viewBox="0 0 ' + width + ' ' + height + '">'
+    + '<defs>'
+    + '<linearGradient id="photoShade" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="' + navy + '" stop-opacity="0.10"/><stop offset="100%" stop-color="' + navy + '" stop-opacity="0.55"/></linearGradient>'
+    + '</defs>'
+    + '<rect width="' + width + '" height="' + height + '" fill="' + beige + '"/>'
+    + '<rect x="0" y="0" width="' + width + '" height="' + photoHeight + '" fill="' + navy + '"/>'
+    + '<image href="' + escapeXml(heroImage) + '" x="0" y="0" width="' + width + '" height="' + photoHeight + '" preserveAspectRatio="xMidYMid slice" opacity="0.92"/>'
+    + '<rect x="0" y="0" width="' + width + '" height="' + photoHeight + '" fill="url(#photoShade)"/>'
+    + '<rect x="' + padding + '" y="54" width="300" height="52" rx="26" fill="' + beige + '" opacity="0.96"/>'
+    + '<image href="' + escapeXml(logoAsset.url) + '" x="' + (padding + 12) + '" y="66" width="30" height="30" preserveAspectRatio="xMidYMid meet"/>'
+    + '<text x="' + (padding + 54) + '" y="86" font-size="17" font-weight="800" fill="' + navy + '">SULTAN HARAMAIN</text>'
+    + '<text x="' + (padding + 54) + '" y="103" font-size="10" font-weight="700" letter-spacing="1.5" fill="' + gold + '">CABANG GRESIK</text>'
+    + '<rect x="0" y="' + photoHeight + '" width="' + width + '" height="' + (height - photoHeight) + '" fill="' + beige + '"/>'
+    + titleMarkup
+    + roleMarkup
+    + '<text x="' + padding + '" y="' + companyY + '" font-size="' + bodySize + '" font-weight="700" fill="' + navy + '">' + escapeXml(SITE.company) + ' · ' + escapeXml(SITE.branch) + '</text>'
+    + '<text x="' + padding + '" y="' + (companyY + 34) + '" font-size="' + (bodySize - 3) + '" fill="' + navySoft + '">Gresik · On-site · Full-time</text>'
+    + '<rect x="' + padding + '" y="' + summaryBoxY + '" width="' + (width - padding * 2) + '" height="' + summaryBoxHeight + '" rx="26" fill="' + beigeSoft + '" opacity="0.82"/>'
+    + '<text x="' + (padding + 24) + '" y="' + (summaryY + 18) + '" font-size="' + (bodySize - 3) + '" font-weight="800" fill="' + navy + '">YANG AKAN ANDA KERJAKAN</text>'
+    + summaryMarkup
+    + '<rect x="' + padding + '" y="' + ctaY + '" width="' + (width - padding * 2) + '" height="' + ctaHeight + '" rx="' + (ctaHeight / 2) + '" fill="' + green + '"/>'
+    + '<text x="' + (width / 2) + '" y="' + (ctaY + ctaHeight * 0.43) + '" text-anchor="middle" font-size="' + (isPortrait ? 24 : 20) + '" font-weight="800" fill="#ffffff">LAMAR VIA WHATSAPP · ' + escapeXml(phone) + '</text>'
+    + '<text x="' + (width / 2) + '" y="' + (ctaY + ctaHeight * 0.73) + '" text-anchor="middle" font-size="' + (isPortrait ? 15 : 13) + '" fill="#eaf7ef">CV + Portofolio · ' + escapeXml(email) + '</text>'
+    + '<rect x="' + padding + '" y="' + footerY + '" width="190" height="5" rx="2.5" fill="' + gold + '"/>'
+    + '<text x="' + padding + '" y="' + (footerY - 10) + '" font-size="' + (isPortrait ? 18 : 15) + '" font-weight="700" fill="' + navy + '">WAJIB BERDOMISILI GRESIK</text>'
+    + '</svg>';
 }
-
 export function CareerSocialExport() {
   const [selectedId, setSelectedId] = useState(FORMATS[0].id);
   const [busy, setBusy] = useState(false);
@@ -367,7 +374,7 @@ export function CareerSocialExport() {
 
             <div className="mt-5 rounded-2xl border border-gold/20 bg-gold/[0.04] p-4">
               <p className="text-xs font-semibold text-foreground">Preset desain</p>
-              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Terinspirasi dari layout recruitment premium Adobe Express: headline kuat, whitespace lega, aksen gold, dan CTA kontras.</p>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Mengikuti referensi Adobe Express: komposisi foto + panel beige, headline besar, aksen gold, dan CTA hijau yang kontras.</p>
             </div>
 
             <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
