@@ -134,7 +134,7 @@ function BadalUmrohPage() {
   const registerLink = waLink("pendaftaran Badal Umroh");
 
   return (
-    <div className="badal-light min-h-screen bg-background">
+    <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 border-b border-border/60 bg-background/90 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
           <Link to="/" className="flex min-w-0 items-center gap-3" aria-label="Sultan Haramain Gresik">
