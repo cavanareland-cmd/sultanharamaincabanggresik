@@ -174,3 +174,24 @@
     opacity: 0.5;
   }
 }
+
+@layer utilities {
+  .reveal-section {
+    opacity: 0;
+    transform: translateY(1.25rem);
+    transition: opacity 650ms ease, transform 650ms ease;
+  }
+
+  .reveal-section.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal-section {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+}

@@ -37,6 +37,7 @@ export function careersMailto() {
 
 export const NAV_LINKS = [
   { label: "Beranda", href: "/#beranda" },
+  { label: "Badal Umroh", href: "/badal-umroh" },
   { label: "Paket Umrah", href: "/#paket" },
   { label: "Keunggulan", href: "/#keunggulan" },
   { label: "Galeri", href: "/#galeri" },
