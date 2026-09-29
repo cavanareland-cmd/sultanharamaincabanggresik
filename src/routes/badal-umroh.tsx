@@ -13,7 +13,7 @@ import {
   ShieldCheck,
   UserRound,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 import heroImage from "@/assets/hero-haramain.jpg";
 import logoAsset from "@/assets/logo.png.asset.json";
@@ -203,7 +203,7 @@ function BadalUmrohPage() {
       </header>
 
       <main>
-        <section className="relative flex min-h-[calc(100svh-4rem)] items-end overflow-hidden pb-16 pt-24 sm:items-center sm:py-24">
+        <section className="relative flex min-h-[calc(92svh-4rem)] items-end overflow-hidden pb-16 pt-24 sm:items-center sm:py-24">
           <img
             src={heroImage}
             alt="Masjidil Haram dan Ka'bah di Tanah Suci"
@@ -425,7 +425,7 @@ function Requirement({ number, children }: { number: string; children: string })
   );
 }
 
-function SocialLink({ href, label, children }: { href: string; label: string; children: React.ReactNode }) {
+function SocialLink({ href, label, children }: { href: string; label: string; children: ReactNode }) {
   return (
     <Button asChild variant="outlineGold" size="icon" aria-label={label}>
       <a href={href} target="_blank" rel="noreferrer">{children}</a>

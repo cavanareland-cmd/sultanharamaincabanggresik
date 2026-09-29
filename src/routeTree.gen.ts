@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as BadalUmrohRouteImport } from './routes/badal-umroh'
 import { Route as KarirRouteImport } from './routes/karir'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 
@@ -29,6 +30,11 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BadalUmrohRoute = BadalUmrohRouteImport.update({
+  id: '/badal-umroh',
+  path: '/badal-umroh',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const KarirRoute = KarirRouteImport.update({
   id: '/karir',
   path: '/karir',
@@ -43,12 +49,14 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/badal-umroh': typeof BadalUmrohRoute
   '/karir': typeof KarirRoute
   '/admin': typeof AuthenticatedAdminRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/badal-umroh': typeof BadalUmrohRoute
   '/karir': typeof KarirRoute
   '/admin': typeof AuthenticatedAdminRoute
 }
@@ -57,19 +65,21 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/badal-umroh': typeof BadalUmrohRoute
   '/karir': typeof KarirRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/karir' | '/admin'
+  fullPaths: '/' | '/auth' | '/badal-umroh' | '/karir' | '/admin'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/karir' | '/admin'
+  to: '/' | '/auth' | '/badal-umroh' | '/karir' | '/admin'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/badal-umroh'
     | '/karir'
     | '/_authenticated/admin'
   fileRoutesById: FileRoutesById
@@ -78,6 +88,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  BadalUmrohRoute: typeof BadalUmrohRoute
   KarirRoute: typeof KarirRoute
 }
 
@@ -102,6 +113,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/badal-umroh': {
+      id: '/badal-umroh'
+      path: '/badal-umroh'
+      fullPath: '/badal-umroh'
+      preLoaderRoute: typeof BadalUmrohRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/karir': {
@@ -136,6 +154,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  BadalUmrohRoute: BadalUmrohRoute,
   KarirRoute: KarirRoute,
 }
 export const routeTree = rootRouteImport

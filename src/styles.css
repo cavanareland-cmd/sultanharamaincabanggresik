@@ -41,6 +41,7 @@
   --color-gold-light: var(--gold-light);
   --color-gold-dark: var(--gold-dark);
   --color-whatsapp: var(--whatsapp);
+  --color-royal: var(--royal);
   --color-surface: var(--surface);
   --color-surface-elevated: var(--surface-elevated);
   --color-chart-1: var(--chart-1);
@@ -74,6 +75,7 @@
   --gold-light: oklch(0.88 0.085 92);
   --gold-dark: oklch(0.58 0.105 76);
   --whatsapp: oklch(0.63 0.16 145);
+  --royal: oklch(0.27 0.075 250);
   --primary: oklch(0.76 0.115 85.5);
   --primary-foreground: oklch(0.15 0.01 60);
   --secondary: oklch(0.23 0.01 65);
