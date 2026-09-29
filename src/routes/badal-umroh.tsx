@@ -134,7 +134,7 @@ function BadalUmrohPage() {
   const registerLink = waLink("pendaftaran Badal Umroh");
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="badal-light min-h-screen bg-background">
       <header className="sticky top-0 z-50 border-b border-border/60 bg-background/90 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
           <Link to="/" className="flex min-w-0 items-center gap-3" aria-label="Sultan Haramain Gresik">
@@ -211,8 +211,8 @@ function BadalUmrohPage() {
             height={1088}
             className="absolute inset-0 h-full w-full object-cover"
           />
-          <div className="absolute inset-0 bg-royal/75" aria-hidden="true" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/35 to-transparent" aria-hidden="true" />
+          <div className="absolute inset-0 bg-white/65" aria-hidden="true" />
+          <div className="absolute inset-0 bg-gradient-to-t from-white via-white/70 to-white/45" aria-hidden="true" />
           <div className="relative mx-auto w-full max-w-7xl px-4 sm:px-6">
             <div className="max-w-4xl border-l-2 border-gold pl-5 sm:pl-8">
               <p className="mb-5 inline-flex items-center gap-2 border border-gold/40 bg-background/55 px-3 py-2 text-xs font-semibold uppercase text-gold backdrop-blur-sm">
