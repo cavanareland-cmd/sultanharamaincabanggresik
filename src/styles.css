@@ -207,3 +207,83 @@
 /* Theme-safe image overlays and decorative surfaces used across public pages. */
 .dark .theme-image-overlay { background: var(--gradient-night); }
 :root:not(.dark) .theme-image-overlay { background: var(--gradient-night); }
+
+
+/* Homepage refinement — scoped to the public homepage only. */
+.sh-home {
+  --background: oklch(0.145 0.012 255);
+  --foreground: oklch(0.96 0.012 88);
+  --surface: oklch(0.19 0.014 255);
+  --surface-elevated: oklch(0.22 0.016 255);
+  --card: oklch(0.19 0.014 255);
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.19 0.014 255);
+  --popover-foreground: var(--foreground);
+  --gold: oklch(0.77 0.13 82);
+  --gold-light: oklch(0.88 0.11 88);
+  --gold-dark: oklch(0.58 0.12 70);
+  --primary: var(--gold);
+  --primary-foreground: oklch(0.16 0.02 255);
+  --secondary: oklch(0.24 0.018 255);
+  --secondary-foreground: var(--foreground);
+  --muted: oklch(0.23 0.016 255);
+  --muted-foreground: oklch(0.73 0.018 85);
+  --accent: oklch(0.28 0.03 80);
+  --accent-foreground: var(--gold-light);
+  --border: oklch(0.77 0.13 82 / 25%);
+  --input: oklch(0.77 0.13 82 / 30%);
+  --ring: var(--gold);
+  --gradient-gold: linear-gradient(120deg, var(--gold-dark), var(--gold), var(--gold-light), var(--gold-dark));
+  --gradient-surface: linear-gradient(145deg, oklch(0.23 0.018 255 / .96), oklch(0.16 0.014 255 / .98));
+  color: var(--foreground);
+  background: #0b1018;
+}
+.sh-home .sh-navbar {
+  border-bottom: 1px solid rgb(255 255 255 / .14);
+  background: rgb(9 14 23 / .72);
+  backdrop-filter: blur(22px);
+}
+.sh-home .sh-content-shell {
+  background:
+    radial-gradient(ellipse at 15% 0%, rgb(198 145 58 / .08), transparent 42%),
+    #0b1018;
+}
+.sh-home main > .sh-content-shell > section,
+.sh-home .sh-content-shell > section {
+  color: var(--foreground);
+}
+.sh-home .sh-content-shell section[id="paket"] {
+  padding-top: 4rem;
+}
+.sh-home .sh-content-shell section[id="paket"] > div:first-child {
+  background: linear-gradient(145deg, rgb(255 255 255 / .08), rgb(255 255 255 / .025));
+  border-color: rgb(224 177 91 / .34);
+  backdrop-filter: blur(16px);
+}
+.sh-home .sh-content-shell article,
+.sh-home .sh-content-shell [data-slot="card"] {
+  background: linear-gradient(145deg, rgb(255 255 255 / .085), rgb(255 255 255 / .025));
+  border-color: rgb(224 177 91 / .25);
+  box-shadow: 0 18px 45px rgb(0 0 0 / .22);
+}
+.sh-home .sh-content-shell section[id="keunggulan"],
+.sh-home .sh-content-shell section:has(> div > div.rounded-2xl) {
+  background: rgb(255 255 255 / .025);
+}
+.sh-home footer {
+  border-color: rgb(224 177 91 / .25);
+  background: #0a0f17;
+}
+.sh-home .sh-hero h1 {
+  text-wrap: balance;
+}
+@media (max-width: 640px) {
+  .sh-home .sh-hero > div:nth-of-type(2) {
+    min-height: 590px;
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+  }
+  .sh-home .sh-hero h1 {
+    font-size: clamp(2.7rem, 12vw, 4rem);
+  }
+}
