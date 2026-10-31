@@ -134,7 +134,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="id">
+    <html lang="id" className="dark">
       <head>
         <HeadContent />
         {/* Google Search Console: custom domain (www.sultanharamaingresik.com) */}

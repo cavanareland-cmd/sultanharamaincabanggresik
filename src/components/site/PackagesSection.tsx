@@ -1,3 +1,4 @@
+import { Filter, MessageCircle, RotateCcw, Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { PackageCard } from "@/components/site/PackageCard";
@@ -52,17 +53,61 @@ export function PackagesSection({ packages }: { packages: UmrahPackage[] }) {
   };
 
   return (
-    <section id="paket" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:py-20">
-      <div className="mb-8 rounded-2xl border border-gold/30 bg-surface/80 p-4 shadow-deep sm:p-5">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-gold">
-          Quick Filter
-        </p>
+    <section id="paket" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+      {/* Section Header */}
+      <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-[#f3c64f] uppercase tracking-[0.2em]">
+            <Sparkles className="size-3.5" />
+            <span>Katalog Resmi 2026/2027</span>
+          </div>
+          <h2 className="mt-2 font-display text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
+            Pilihan Paket <span className="text-gradient-gold">Umrah Unggulan</span>
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Menampilkan {filtered.length} dari {packages.length} paket ibadah Umrah dengan fasilitas hotel dekat Masjidil Haram.
+          </p>
+        </div>
+
+        <Button
+          asChild
+          size="sm"
+          className="rounded-full border border-white/15 bg-white/5 text-white hover:bg-white/10 hover:border-white/30 text-xs px-4"
+        >
+          <a href={waLink("konsultasi paket umrah terbaru")} target="_blank" rel="noreferrer">
+            <MessageCircle className="size-3.5 mr-1.5 text-[#25D366]" />
+            Tanya Customer Service
+          </a>
+        </Button>
+      </div>
+
+      {/* Floating Glass Filter Toolbar */}
+      <div className="mb-10 rounded-2xl border border-white/10 bg-[#0e1320]/80 p-4 shadow-xl backdrop-blur-2xl sm:p-5">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2 text-xs font-semibold text-[#f3c64f] uppercase tracking-wider">
+            <Filter className="size-3.5" />
+            <span>Filter Cepat Paket</span>
+          </div>
+          {(month !== ALL || airline !== ALL || price !== ALL) && (
+            <button
+              onClick={reset}
+              className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-[#f3c64f] transition-colors"
+            >
+              <RotateCcw className="size-3" />
+              Reset Filter
+            </button>
+          )}
+        </div>
+
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Select value={month} onValueChange={setMonth}>
-            <SelectTrigger aria-label="Filter bulan">
-              <SelectValue placeholder="Bulan" />
+            <SelectTrigger
+              aria-label="Filter bulan"
+              className="rounded-xl border-white/10 bg-black/40 text-xs text-foreground focus:ring-[#f3c64f]"
+            >
+              <SelectValue placeholder="Bulan Keberangkatan" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="border-white/10 bg-[#0f1422] text-foreground">
               <SelectItem value={ALL}>Semua Bulan</SelectItem>
               {months.map((m) => (
                 <SelectItem key={m} value={m}>
@@ -73,10 +118,13 @@ export function PackagesSection({ packages }: { packages: UmrahPackage[] }) {
           </Select>
 
           <Select value={airline} onValueChange={setAirline}>
-            <SelectTrigger aria-label="Filter maskapai">
-              <SelectValue placeholder="Maskapai" />
+            <SelectTrigger
+              aria-label="Filter maskapai"
+              className="rounded-xl border-white/10 bg-black/40 text-xs text-foreground focus:ring-[#f3c64f]"
+            >
+              <SelectValue placeholder="Maskapai Penerbangan" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="border-white/10 bg-[#0f1422] text-foreground">
               <SelectItem value={ALL}>Semua Maskapai</SelectItem>
               {airlines.map((a) => (
                 <SelectItem key={a} value={a}>
@@ -87,11 +135,14 @@ export function PackagesSection({ packages }: { packages: UmrahPackage[] }) {
           </Select>
 
           <Select value={price} onValueChange={setPrice}>
-            <SelectTrigger aria-label="Filter harga">
-              <SelectValue placeholder="Harga" />
+            <SelectTrigger
+              aria-label="Filter harga"
+              className="rounded-xl border-white/10 bg-black/40 text-xs text-foreground focus:ring-[#f3c64f]"
+            >
+              <SelectValue placeholder="Rentang Harga" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={ALL}>Semua Harga</SelectItem>
+            <SelectContent className="border-white/10 bg-[#0f1422] text-foreground">
+              <SelectItem value={ALL}>Semua Rentang Harga</SelectItem>
               {PRICE_RANGES.map((r) => (
                 <SelectItem key={r.value} value={r.value}>
                   {r.label}
@@ -100,34 +151,34 @@ export function PackagesSection({ packages }: { packages: UmrahPackage[] }) {
             </SelectContent>
           </Select>
 
-          <Button variant="outlineGold" onClick={reset}>
-            Reset Filter
+          <Button
+            type="button"
+            variant="outline"
+            onClick={reset}
+            className="rounded-xl border-white/15 bg-white/5 text-xs text-muted-foreground hover:bg-white/10 hover:text-foreground"
+          >
+            Reset Semua Filter
           </Button>
         </div>
       </div>
 
-      <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h2 className="font-display text-3xl font-bold sm:text-4xl">
-            Paket <span className="text-gradient-gold">Umrah Unggulan</span>
-          </h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {filtered.length} paket tersedia &middot; harga sewaktu-waktu dapat berubah
-          </p>
-        </div>
-        <Button asChild variant="whatsapp">
-          <a href={waLink("jadwal & harga paket umrah terbaru")} target="_blank" rel="noreferrer">
-            Tanya CS
-          </a>
-        </Button>
-      </div>
-
+      {/* Package Grid */}
       {filtered.length === 0 ? (
-        <p className="rounded-xl border border-border bg-surface p-8 text-center text-sm text-muted-foreground">
-          Tidak ada paket sesuai filter. Silakan reset filter atau tanya CS kami.
-        </p>
+        <div className="rounded-3xl border border-white/10 bg-[#0e1320]/60 p-12 text-center backdrop-blur-xl">
+          <p className="font-display text-xl font-bold text-white">Tidak Ada Paket Yang Sesuai</p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Coba atur ulang filter pencarian atau hubungi Customer Service kami untuk paket kustom.
+          </p>
+          <Button
+            type="button"
+            onClick={reset}
+            className="mt-5 rounded-full bg-[#f3c64f] text-black font-semibold text-xs px-5"
+          >
+            Tampilkan Semua Paket
+          </Button>
+        </div>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {filtered.map((pkg) => (
             <PackageCard key={pkg.id} pkg={pkg} />
           ))}
