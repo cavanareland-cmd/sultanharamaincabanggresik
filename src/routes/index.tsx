@@ -13,147 +13,64 @@ import { TrustBanner } from "@/components/site/TrustBanner";
 import { getHomeContent } from "@/lib/content.functions";
 import { SITE, waLink } from "@/lib/site";
 
-const homeQuery = queryOptions({
-  queryKey: ["home-content"],
-  queryFn: () => getHomeContent(),
-});
-
+const homeQuery = queryOptions({ queryKey: ["home-content"], queryFn: () => getHomeContent() });
 const TITLE = "Travel Umrah Gresik Resmi | Sultan Haramain";
-const DESCRIPTION =
-  "Paket Umrah mewah & terpercaya dari PT Sultan Barokah Haramain Cabang Gresik. Izin PPIU 04042300022560003. Hotel dekat Haramain, muthawwif berpengalaman.";
-
+const DESCRIPTION = "Paket Umrah mewah & terpercaya dari PT Sultan Barokah Haramain Cabang Gresik. Izin PPIU 04042300022560003. Hotel dekat Haramain, muthawwif berpengalaman.";
 const CANONICAL = `${SITE.url}/`;
 
 export const Route = createFileRoute("/")({
   loader: ({ context }) => context.queryClient.ensureQueryData(homeQuery),
   head: ({ loaderData }) => ({
     meta: [
-      { title: TITLE },
-      { name: "description", content: DESCRIPTION },
-      { property: "og:title", content: TITLE },
-      { property: "og:description", content: DESCRIPTION },
-      { property: "og:url", content: CANONICAL },
-      { property: "og:site_name", content: `${SITE.company} ${SITE.branch}` },
+      { title: TITLE }, { name: "description", content: DESCRIPTION },
+      { property: "og:title", content: TITLE }, { property: "og:description", content: DESCRIPTION },
+      { property: "og:url", content: CANONICAL }, { property: "og:site_name", content: `${SITE.company} ${SITE.branch}` },
     ],
     links: [{ rel: "canonical", href: CANONICAL }],
     scripts: [
-      {
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "TravelAgency",
-          name: `${SITE.company} - ${SITE.branch}`,
-          url: CANONICAL,
-          telephone: `+${SITE.phoneIntl}`,
-          address: {
-            "@type": "PostalAddress",
-            streetAddress: "Jl. Samanhudi No. 37",
-            addressLocality: "Gresik",
-            addressRegion: "Jawa Timur",
-            addressCountry: "ID",
+      { type: "application/ld+json", children: JSON.stringify({
+        "@context": "https://schema.org", "@type": "TravelAgency", name: `${SITE.company} - ${SITE.branch}`,
+        url: CANONICAL, telephone: `+${SITE.phoneIntl}`,
+        address: { "@type": "PostalAddress", streetAddress: "Jl. Samanhudi No. 37", addressLocality: "Gresik", addressRegion: "Jawa Timur", addressCountry: "ID" },
+        sameAs: [SITE.instagram, SITE.facebook, SITE.tiktok],
+      }) },
+      ...((loaderData?.packages ?? []).length ? [{ type: "application/ld+json", children: JSON.stringify({
+        "@context": "https://schema.org", "@type": "ItemList", name: "Paket Umrah Sultan Haramain Gresik",
+        itemListElement: (loaderData?.packages ?? []).map((pkg, index) => ({
+          "@type": "ListItem", position: index + 1, item: {
+            "@type": "Product", name: pkg.title,
+            description: pkg.notes || [pkg.duration_days ? `${pkg.duration_days} hari` : "", pkg.departure_city ? `keberangkatan ${pkg.departure_city}` : "", pkg.hotel_makkah ? `Hotel Makkah ${pkg.hotel_makkah}` : "", pkg.hotel_madinah ? `Hotel Madinah ${pkg.hotel_madinah}` : ""].filter(Boolean).join(", "),
+            url: CANONICAL, brand: { "@type": "Brand", name: `${SITE.company} ${SITE.branch}` },
+            ...(pkg.price_numeric ? { offers: { "@type": "Offer", price: pkg.price_numeric, priceCurrency: "IDR", availability: "https://schema.org/InStock", url: CANONICAL } } : {}),
           },
-          sameAs: [SITE.instagram, SITE.facebook, SITE.tiktok],
-        }),
-      },
-      ...((loaderData?.packages ?? []).length
-        ? [
-            {
-              type: "application/ld+json",
-              children: JSON.stringify({
-                "@context": "https://schema.org",
-                "@type": "ItemList",
-                name: "Paket Umrah Sultan Haramain Gresik",
-                itemListElement: (loaderData?.packages ?? []).map((pkg, index) => ({
-                  "@type": "ListItem",
-                  position: index + 1,
-                  item: {
-                    "@type": "Product",
-                    name: pkg.title,
-                    description:
-                      pkg.notes ||
-                      [
-                        pkg.duration_days ? `${pkg.duration_days} hari` : "",
-                        pkg.departure_city ? `keberangkatan ${pkg.departure_city}` : "",
-                        pkg.hotel_makkah ? `Hotel Makkah ${pkg.hotel_makkah}` : "",
-                        pkg.hotel_madinah ? `Hotel Madinah ${pkg.hotel_madinah}` : "",
-                      ]
-                        .filter(Boolean)
-                        .join(", "),
-                    url: CANONICAL,
-                    brand: { "@type": "Brand", name: `${SITE.company} ${SITE.branch}` },
-                    ...(pkg.price_numeric
-                      ? {
-                          offers: {
-                            "@type": "Offer",
-                            price: pkg.price_numeric,
-                            priceCurrency: "IDR",
-                            availability: "https://schema.org/InStock",
-                            url: CANONICAL,
-                          },
-                        }
-                      : {}),
-                  },
-                })),
-              }),
-            },
-          ]
-        : []),
+        })),
+      }) }] : []),
     ],
   }),
-
   component: Home,
-  errorComponent: ({ error }) => (
-    <div className="flex min-h-screen items-center justify-center p-6 text-center" role="alert">
-      <p className="text-sm text-muted-foreground">{error.message}</p>
-    </div>
-  ),
-  notFoundComponent: () => (
-    <div className="flex min-h-screen items-center justify-center p-6">
-      <p className="text-sm text-muted-foreground">Konten belum tersedia.</p>
-    </div>
-  ),
+  errorComponent: ({ error }) => <div className="flex min-h-screen items-center justify-center p-6 text-center" role="alert"><p className="text-sm text-muted-foreground">{error.message}</p></div>,
+  notFoundComponent: () => <div className="flex min-h-screen items-center justify-center p-6"><p className="text-sm text-muted-foreground">Konten belum tersedia.</p></div>,
 });
 
 function Home() {
   const { data } = useSuspenseQuery(homeQuery);
   const content = data.content;
-
   return (
-    <div className="min-h-screen bg-background">
-      {content["announcement"] ? (
-        <div className="bg-gradient-gold px-4 py-2 text-center text-xs font-semibold text-primary-foreground sm:text-sm">
-          {content["announcement"]}
-        </div>
-      ) : null}
-
+    <div className="dark sh-home min-h-screen bg-background text-foreground">
+      {content["announcement"] ? <div className="bg-gradient-gold px-4 py-2 text-center text-xs font-semibold text-primary-foreground sm:text-sm">{content["announcement"]}</div> : null}
       <Navbar />
-
       <main>
-        <Hero
-          title={content["hero_title"] ?? "Perjalanan Ibadah Umrah Mewah, Nyaman, & Terpercaya"}
-          subtitle={
-            content["hero_subtitle"] ??
-            `${SITE.company} ${SITE.branch} - No. Izin PPIU ${SITE.ppiu}`
-          }
-        />
-        <PackagesSection packages={data.packages} />
-        <Advantages />
-        <TrustBanner />
-        <Gallery images={data.gallery} />
-        <Testimonials />
+        <Hero title={content["hero_title"] ?? "Perjalanan Ibadah Umrah Mewah & Bermakna"} subtitle={content["hero_subtitle"] ?? `${SITE.company} ${SITE.branch} - No. Izin PPIU ${SITE.ppiu}`} />
+        <div className="sh-content-shell">
+          <PackagesSection packages={data.packages} />
+          <Advantages />
+          <TrustBanner />
+          <Gallery images={data.gallery} />
+          <Testimonials />
+        </div>
       </main>
-
       <Footer content={content} />
-
-      <a
-        href={waLink("paket umrah")}
-        target="_blank"
-        rel="noreferrer"
-        aria-label="Chat WhatsApp"
-        className="fixed bottom-5 right-5 z-50 inline-flex size-14 items-center justify-center rounded-full bg-whatsapp text-primary-foreground shadow-deep transition-transform hover:scale-105"
-      >
-        <MessageCircle className="size-6" />
-      </a>
+      <a href={waLink("paket umrah")} target="_blank" rel="noreferrer" aria-label="Chat WhatsApp" className="fixed bottom-5 right-5 z-50 inline-flex size-14 items-center justify-center rounded-full border border-white/20 bg-[#1fbd70] text-white shadow-deep transition-transform hover:scale-105"><MessageCircle className="size-6" /></a>
     </div>
   );
 }
