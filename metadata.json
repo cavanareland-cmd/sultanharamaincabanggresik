@@ -1,0 +1,8 @@
+{
+  "name": "Sultan Haramain Gresik",
+  "description": "PT Sultan Barokah Haramain Cabang Gresik - Travel Umrah Resmi berizin PPIU 04042300022560003",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

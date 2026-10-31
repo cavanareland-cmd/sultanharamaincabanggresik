@@ -18,4 +18,10 @@ export default defineConfig({
   // (and any local `vite build` outside the sandbox) this emits `.vercel/output`,
   // which Vercel consumes automatically.
   nitro: { preset: "vercel" },
+  vite: {
+    server: {
+      host: "0.0.0.0",
+      port: 3000,
+    },
+  },
 });
