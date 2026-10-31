@@ -11,81 +11,50 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border/60 bg-background/85 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-        <Link to="/" className="flex items-center gap-3">
-          <img
-            src={logoAsset.url}
-            alt="Logo Sultan Haramain Gresik"
-            width={48}
-            height={48}
-            className="h-11 w-11 object-contain"
-          />
+    <header className="sh-navbar sticky top-0 z-50">
+      <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+        <Link to="/" className="flex shrink-0 items-center gap-3" aria-label="Sultan Haramain Gresik — Beranda">
+          <img src={logoAsset.url} alt="Logo Sultan Haramain Gresik" width={58} height={58} className="h-12 w-12 object-contain sm:h-14 sm:w-14" />
           <span className="leading-tight">
-            <span className="block font-display text-lg font-semibold tracking-wide text-gradient-gold">
-              SULTAN HARAMAIN
-            </span>
-            <span className="block text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-              Cabang Gresik
-            </span>
+            <span className="block font-display text-lg font-semibold tracking-wide text-white sm:text-xl">Sultan Haramain</span>
+            <span className="block text-xs font-semibold text-gold">Cabang Gresik</span>
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-7 lg:flex">
-          {NAV_LINKS.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="text-sm font-medium text-foreground/80 transition-colors hover:text-gold"
-            >
+        <nav aria-label="Navigasi utama" className="hidden items-center gap-1 rounded-full border border-white/20 bg-black/35 p-1.5 shadow-2xl backdrop-blur-xl lg:flex">
+          {NAV_LINKS.filter((link) => link.label !== "Badal Umroh" && link.label !== "Keunggulan" && link.label !== "Testimoni" && link.label !== "Karir").map((link) => (
+            <a key={link.href} href={link.href} className="rounded-full px-4 py-2.5 text-[13px] font-medium text-white/85 transition hover:bg-white/10 hover:text-gold">
               {link.label}
             </a>
           ))}
+          <Link to="/badal-umroh" className="rounded-full px-4 py-2.5 text-[13px] font-medium text-white/85 transition hover:bg-white/10 hover:text-gold">Badal Umroh</Link>
+          <Link to="/karir" className="rounded-full px-4 py-2.5 text-[13px] font-medium text-white/85 transition hover:bg-white/10 hover:text-gold">Karir</Link>
         </nav>
 
-        <div className="flex items-center gap-2">
-          <Button asChild variant="whatsapp" size="sm" className="hidden sm:inline-flex">
-            <a href={waLink("paket umrah")} target="_blank" rel="noreferrer">
-              <MessageCircle className="size-4" />
-              Hubungi Kami
-            </a>
+        <div className="flex shrink-0 items-center gap-2">
+          <Button asChild variant="outlineGold" size="icon" className="hidden rounded-full border-white/25 bg-black/30 text-white hover:bg-white/10 sm:inline-flex" aria-label="Hubungi melalui WhatsApp">
+            <a href={waLink("informasi paket umrah")} target="_blank" rel="noreferrer"><MessageCircle className="size-4" /></a>
           </Button>
-
+          <Button asChild variant="gold" size="sm" className="hidden rounded-full sm:inline-flex">
+            <a href={waLink("konsultasi paket umrah")} target="_blank" rel="noreferrer">Hubungi Kami</a>
+          </Button>
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <Button variant="outlineGold" size="icon" className="lg:hidden" aria-label="Buka menu">
-                <Menu className="size-5" />
-              </Button>
+              <Button variant="outlineGold" size="icon" className="rounded-full border-white/25 bg-black/30 text-white hover:bg-white/10 lg:hidden" aria-label="Buka menu"><Menu className="size-5" /></Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[82vw] border-border bg-surface sm:w-80">
-              <SheetTitle className="font-display text-xl text-gradient-gold">
-                SULTAN HARAMAIN
-              </SheetTitle>
-              <nav className="mt-6 flex flex-col gap-1">
+            <SheetContent side="right" className="w-[84vw] border-white/10 bg-[#10151d] text-white sm:w-80">
+              <SheetTitle className="font-display text-xl text-gold">Sultan Haramain · Gresik</SheetTitle>
+              <nav aria-label="Navigasi mobile" className="mt-7 flex flex-col gap-1">
                 {NAV_LINKS.map((link) => (
-                  <a
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setOpen(false)}
-                    className="rounded-lg px-3 py-3 text-base font-medium text-foreground/85 transition-colors hover:bg-accent hover:text-gold"
-                  >
-                    {link.label}
-                  </a>
+                  link.href.startsWith("/") && !link.href.startsWith("/#") ? (
+                    <Link key={link.href} to={link.href as "/badal-umroh" | "/karir"} onClick={() => setOpen(false)} className="rounded-lg px-3 py-3 text-sm text-white/85 hover:bg-white/10 hover:text-gold">{link.label}</Link>
+                  ) : (
+                    <a key={link.href} href={link.href} onClick={() => setOpen(false)} className="rounded-lg px-3 py-3 text-sm text-white/85 hover:bg-white/10 hover:text-gold">{link.label}</a>
+                  )
                 ))}
               </nav>
-              <div className="mt-6 space-y-3">
-                <Button asChild variant="whatsapp" className="w-full">
-                  <a href={waLink("paket umrah")} target="_blank" rel="noreferrer">
-                    <MessageCircle className="size-4" />
-                    Hubungi Kami
-                  </a>
-                </Button>
-                <p className="text-xs text-muted-foreground">
-                  {SITE.address}
-                  <br />
-                  Hotline {SITE.phoneDisplay}
-                </p>
-              </div>
+              <Button asChild variant="gold" className="mt-7 w-full"><a href={waLink("konsultasi paket umrah")} target="_blank" rel="noreferrer"><MessageCircle className="size-4" /> Hubungi Kami</a></Button>
+              <p className="mt-5 text-xs text-white/45">{SITE.phoneDisplay}</p>
             </SheetContent>
           </Sheet>
         </div>
