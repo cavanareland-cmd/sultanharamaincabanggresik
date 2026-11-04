@@ -108,31 +108,58 @@ function PublicLabelCenterPage() {
         }
       }
       ctx.putImageData(pixels, 0, 0);
-      const panel = ctx.createLinearGradient(0, 1720, 0, 2048);
-      panel.addColorStop(0, "#321608"); panel.addColorStop(.55, "#241006"); panel.addColorStop(1, "#180b05");
-      ctx.fillStyle = panel; ctx.fillRect(30, 1718, 250, 330);
-      ctx.strokeStyle = "rgba(207,164,91,.42)"; ctx.lineWidth = 1; ctx.strokeRect(35, 1724, 240, 318);
-      ctx.textBaseline = "alphabetic"; ctx.textAlign = "left"; ctx.fillStyle = "#f4e5ca"; ctx.font = "bold 17px Arial";
-      ctx.fillText("BARANG INI", 43, 1753); ctx.fillText("MILIK :", 43, 1774);
-      ctx.textAlign = "right"; ctx.fillStyle = "#e8b95e"; ctx.font = "bold 56px Arial"; ctx.fillText(draft.number || "—", 268, 1777, 108);
-      ctx.textAlign = "left"; ctx.fillStyle = "#f4e5ca";
-      const words = (draft.name || "NAMA JAMAAH").trim().split(/\s+/);
-      let lines: string[] = []; let fontSize = 28;
-      for (const size of [28, 26, 24, 22, 20]) {
-        ctx.font = "bold " + size + "px Arial"; lines = []; let line = "";
-        for (const word of words) { const next = line ? line + " " + word : word; if (ctx.measureText(next).width > 220 && line) { lines.push(line); line = word; } else line = next; }
-        if (line) lines.push(line); fontSize = size; if (lines.length <= 3) break;
+      // Keep the original artwork and its existing decorative room labels.
+      // Replace only the lower text panel, edge-to-edge, to avoid a second inset card.
+      const panelTop = Math.round(canvas.height * 0.79);
+      const panelBottom = Math.round(canvas.height * 0.985);
+      const panelLeft = Math.round(canvas.width * 0.08);
+      const panelWidth = Math.round(canvas.width * 0.84);
+      ctx.fillStyle = "#2b1208";
+      ctx.fillRect(panelLeft, panelTop, panelWidth, panelBottom - panelTop);
+      ctx.textBaseline = "alphabetic";
+      ctx.textAlign = "left";
+      ctx.fillStyle = "#f4e5ca";
+      ctx.font = "bold 15px Arial";
+      ctx.fillText("BARANG INI", panelLeft + 8, panelTop + 26);
+      ctx.fillText("MILIK :", panelLeft + 8, panelTop + 44);
+      ctx.textAlign = "right";
+      ctx.fillStyle = "#e8b95e";
+      ctx.font = "bold 48px Arial";
+      ctx.fillText(draft.number || "—", panelLeft + panelWidth - 8, panelTop + 48, 90);
+      ctx.textAlign = "left";
+      ctx.fillStyle = "#f4e5ca";
+      const words = (draft.name || "NAMA JAMAAH").trim().split(/\\s+/);
+      let lines: string[] = [];
+      let fontSize = 27;
+      for (const size of [27, 25, 23, 21, 19]) {
+        ctx.font = "bold " + size + "px Arial";
+        lines = [];
+        let line = "";
+        for (const word of words) {
+          const next = line ? line + " " + word : word;
+          if (ctx.measureText(next).width > panelWidth - 18 && line) { lines.push(line); line = word; }
+          else line = next;
+        }
+        if (line) lines.push(line);
+        fontSize = size;
+        if (lines.length <= 3) break;
       }
       ctx.font = "bold " + fontSize + "px Arial";
-      const lineHeight = Math.min(34, fontSize + 7), nameY = 1835;
-      lines.slice(0, 3).forEach((line, index) => ctx.fillText(line, 43, nameY + index * lineHeight));
-      const footerY = Math.max(1944, nameY + Math.min(lines.length, 3) * lineHeight + 12);
-      ctx.strokeStyle = "#c99b50"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(43, footerY); ctx.lineTo(268, footerY); ctx.stroke();
-      ctx.fillStyle = "#f4e5ca"; ctx.font = "bold 13px Arial"; ctx.textAlign = "left"; ctx.fillText("TL : " + (draft.leader || "—"), 43, footerY + 28, 225);
-      ctx.font = "bold 14px Arial"; ctx.fillText("☎ " + (draft.phone || "—"), 43, footerY + 62, 225);
-      ctx.save(); ctx.translate(155, 430); ctx.rotate(Math.PI); ctx.fillStyle = "#4b210d"; ctx.font = "italic bold 18px Georgia"; ctx.textAlign = "center"; ctx.fillText(draft.madinah || "Madinah", 0, 0, 210); ctx.restore();
-      ctx.save(); ctx.translate(155, 595); ctx.rotate(Math.PI); ctx.fillStyle = "#4b210d"; ctx.font = "italic bold 18px Georgia"; ctx.textAlign = "center"; ctx.fillText(draft.makkah || "Mekah", 0, 0, 210); ctx.restore();
-      ctx.save(); ctx.translate(155, 625); ctx.rotate(Math.PI); ctx.fillStyle = "#35190d"; ctx.font = "bold 42px Arial"; ctx.textAlign = "center"; ctx.fillText(draft.roomTitle, 0, 0, 250); ctx.restore();
+      const lineHeight = fontSize + 5;
+      const nameY = panelTop + 104;
+      lines.slice(0, 3).forEach((line, index) => ctx.fillText(line, panelLeft + 8, nameY + index * lineHeight, panelWidth - 16));
+      const footerY = Math.min(panelBottom - 52, nameY + Math.min(lines.length, 3) * lineHeight + 12);
+      ctx.strokeStyle = "#c99b50";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(panelLeft + 8, footerY);
+      ctx.lineTo(panelLeft + panelWidth - 8, footerY);
+      ctx.stroke();
+      ctx.fillStyle = "#f4e5ca";
+      ctx.font = "bold 12px Arial";
+      ctx.fillText("TL : " + (draft.leader || "—"), panelLeft + 8, footerY + 22, panelWidth - 16);
+      ctx.font = "bold 13px Arial";
+      ctx.fillText("☎ " + (draft.phone || "—"), panelLeft + 8, footerY + 45, panelWidth - 16);
       const centerCanvas = centerCanvasRef.current;
       if (centerCanvas) { centerCanvas.width = canvas.width; centerCanvas.height = canvas.height; const centerCtx = centerCanvas.getContext("2d"); centerCtx?.drawImage(canvas, 0, 0); }
     };
