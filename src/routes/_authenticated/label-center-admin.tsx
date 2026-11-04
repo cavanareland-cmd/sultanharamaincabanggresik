@@ -95,38 +95,70 @@ function LabelCenterPage() {
         }
       }
       ctx.putImageData(pixels, 0, 0);
-      ctx.fillStyle = "#2b1108";
-      ctx.fillRect(34, 1722, 242, 326);
-      ctx.textAlign = "left";
+      // Replace only the inner writable panel; keep the original patterned side borders,
+      // gold frame, logos and decorative artwork from the supplied master image intact.
+      const panel = ctx.createLinearGradient(0, 1720, 0, 2048);
+      panel.addColorStop(0, "#321608");
+      panel.addColorStop(0.55, "#241006");
+      panel.addColorStop(1, "#180b05");
+      ctx.fillStyle = panel;
+      ctx.fillRect(30, 1718, 250, 330);
+      ctx.strokeStyle = "rgba(207,164,91,.42)";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(35, 1724, 240, 318);
+      // Subtle geometric linework echoes the template without covering its border ornaments.
+      ctx.globalAlpha = 0.16;
+      ctx.strokeStyle = "#c99b50";
+      for (let y = 1810; y < 2040; y += 34) {
+        ctx.beginPath(); ctx.moveTo(42, y); ctx.lineTo(268, y); ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
       ctx.textBaseline = "alphabetic";
+      ctx.textAlign = "left";
       ctx.fillStyle = "#f4e5ca";
-      ctx.font = "bold 18px Arial";
-      ctx.fillText("BARANG INI", 44, 1752);
-      ctx.fillText("MILIK :", 44, 1772);
+      ctx.font = "bold 17px Arial";
+      ctx.fillText("BARANG INI", 43, 1753);
+      ctx.fillText("MILIK :", 43, 1774);
       ctx.textAlign = "right";
       ctx.fillStyle = "#e8b95e";
-      ctx.font = "bold 58px Arial";
-      ctx.fillText(number || "—", 270, 1772);
+      ctx.font = "bold 56px Arial";
+      ctx.fillText(number || "—", 268, 1777, 108);
       ctx.textAlign = "left";
       ctx.fillStyle = "#f4e5ca";
-      ctx.font = "bold 29px Arial";
-      const nameWords = (name || "NAMA JAMAAH").split(/\\s+/);
-      let line = "", y = 1830;
-      for (const word of nameWords) {
-        const next = line ? line + " " + word : word;
-        if (ctx.measureText(next).width > 220 && line) { ctx.fillText(line, 44, y); y += 34; line = word; }
-        else line = next;
+      const nameWords = (name || "NAMA JAMAAH").trim().split(/\s+/);
+      const nameLines: string[] = [];
+      let nameLine = "";
+      let nameFont = 28;
+      const maxNameWidth = 220;
+      for (const candidateSize of [28, 26, 24, 22, 20]) {
+        ctx.font = "bold " + candidateSize + "px Arial";
+        nameLines.length = 0;
+        nameLine = "";
+        for (const word of nameWords) {
+          const candidate = nameLine ? nameLine + " " + word : word;
+          if (ctx.measureText(candidate).width > maxNameWidth && nameLine) {
+            nameLines.push(nameLine);
+            nameLine = word;
+          } else nameLine = candidate;
+        }
+        if (nameLine) nameLines.push(nameLine);
+        nameFont = candidateSize;
+        if (nameLines.length <= 3) break;
       }
-      if (line) ctx.fillText(line, 44, y);
+      ctx.font = "bold " + nameFont + "px Arial";
+      const nameStartY = 1835;
+      const nameLineHeight = Math.min(34, nameFont + 7);
+      nameLines.slice(0, 3).forEach((text, index) => ctx.fillText(text, 43, nameStartY + index * nameLineHeight));
+      const footerY = Math.max(1944, nameStartY + Math.min(nameLines.length, 3) * nameLineHeight + 12);
       ctx.strokeStyle = "#c99b50";
       ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.moveTo(44, 1945); ctx.lineTo(270, 1945); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(43, footerY); ctx.lineTo(268, footerY); ctx.stroke();
       ctx.fillStyle = "#f4e5ca";
-      ctx.font = "bold 15px Arial";
+      ctx.font = "bold 13px Arial";
       ctx.textAlign = "left";
-      ctx.fillText("TL : " + (leader || "—"), 44, 1978, 225);
-      ctx.font = "bold 16px Arial";
-      ctx.fillText("☎ " + (phone || "—"), 44, 2020, 225);
+      ctx.fillText("TL : " + (leader || "—"), 43, footerY + 28, 225);
+      ctx.font = "bold 14px Arial";
+      ctx.fillText("☎ " + (phone || "—"), 43, footerY + 62, 225);
       ctx.save();
       ctx.translate(155, 430);
       ctx.rotate(Math.PI);
