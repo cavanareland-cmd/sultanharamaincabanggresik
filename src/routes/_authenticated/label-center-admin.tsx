@@ -58,7 +58,7 @@ function LabelCenterPage() {
   const selected = people.find((person) => person.id === selectedId);
   const filtered = useMemo(() => people.filter((person) => person.name.toLowerCase().includes(search.toLowerCase()) || person.number.includes(search)), [people, search]);
   const choose = (person: Person) => { setSelectedId(person.id); setName(person.name); setNumber(person.number); setLeader(person.leader); setPhone(person.phone); setLabelColor(person.labelColor); setRoomMakkah(person.roomMakkah); setRoomMadinah(person.roomMadinah); setSaved(false); };
-  const cancel = () => { if (selected) choose(selected); else { setName(""); setNumber(""); setLeader(""); setPhone(""); setRoomMakkah(""); setRoomMadinah(""); setLabelColor(colors[0]); } setSaved(false); toast.info("Perubahan dibatalkan."); };
+  const cancel = () => { if (selected) choose(selected); else { setName(""); setNumber(""); setLeader(""); setPhone(""); setRoomMakkah(""); setRoomMadinah(""); setLabelColor("#b6a6d5"); } setSaved(false); toast.info("Perubahan dibatalkan."); };
   const restore = () => { setLabelColor("#b6a6d5"); setRoomTitle("ROOM NUMBER"); toast.success("Warna dan teks template dikembalikan ke default."); };
   const save = async () => {
     if (!name.trim()) { toast.error("Nama jamaah wajib diisi."); return; }
@@ -74,7 +74,7 @@ function LabelCenterPage() {
     setPeople((rows) => selectedId ? rows.map((person) => person.id === selectedId ? savedPerson : person) : [...rows, savedPerson]);
     setSelectedId(row.id); setSaved(true); toast.success("Data jamaah berhasil disimpan ke database.");
   };
-  const addPerson = () => { setSelectedId(""); setName(""); setNumber(""); setLeader(""); setPhone(""); setRoomMakkah(""); setRoomMadinah(""); setLabelColor(colors[0]); setSaved(false); };
+  const addPerson = () => { setSelectedId(""); setName(""); setNumber(""); setLeader(""); setPhone(""); setRoomMakkah(""); setRoomMadinah(""); setLabelColor("#b6a6d5"); setSaved(false); };
   const renderTemplate = () => {
     const canvas = previewCanvas.current;
     if (!canvas) return;
