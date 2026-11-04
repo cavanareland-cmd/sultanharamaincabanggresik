@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Jadikan Label Koper publik dengan SELECT terbatas dan pengelolaan khusus admin; verifikasi signed-out/admin/non-admin — menunggu kepastian backend target dan isolasi perubahan dari produksi.
+
 - [x] Tambahkan menu Label Koper khusus admin di header desktop/mobile; tes aturan akses dan navigasi admin berhasil, pratinjau build OK, tanpa publish produksi.
 
 - [x] Perbaiki kesalahan tipe pratinjau; pemeriksaan otomatis sukses, halaman utama tampil, dan halaman label dikenali tanpa publish produksi.
