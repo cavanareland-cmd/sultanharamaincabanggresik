@@ -6,11 +6,9 @@ import logoAsset from "@/assets/logo.png.asset.json";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { NAV_LINKS, SITE, waLink } from "@/lib/site";
-import { useAdminNavigation } from "@/hooks/use-admin-navigation";
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
-  const isAdmin = useAdminNavigation();
 
   return (
     <header className="sh-navbar sticky top-0 z-50">
@@ -31,7 +29,7 @@ export function Navbar() {
           ))}
           <Link to="/badal-umroh" className="rounded-full px-4 py-2.5 text-[13px] font-medium text-white/85 transition hover:bg-white/10 hover:text-gold">Badal Umroh</Link>
           <Link to="/karir" className="rounded-full px-4 py-2.5 text-[13px] font-medium text-white/85 transition hover:bg-white/10 hover:text-gold">Karir</Link>
-          {isAdmin && <Link to="/label-center" activeOptions={{ exact: true }} activeProps={{ className: "bg-primary/15 text-primary" }} inactiveProps={{ className: "text-foreground/85" }} className="rounded-full px-3 py-2.5 text-[13px] font-medium transition hover:bg-primary/10 hover:text-primary">Label Koper</Link>}
+          <Link to="/label-center" activeOptions={{ exact: true }} activeProps={{ className: "bg-primary/15 text-primary" }} inactiveProps={{ className: "text-white/85" }} className="rounded-full px-3 py-2.5 text-[13px] font-medium transition hover:bg-white/10 hover:text-gold">Label Koper</Link>
         </nav>
 
         <div className="flex shrink-0 items-center gap-2">
@@ -55,7 +53,7 @@ export function Navbar() {
                     <a key={link.href} href={link.href} onClick={() => setOpen(false)} className="rounded-lg px-3 py-3 text-sm text-white/85 hover:bg-white/10 hover:text-gold">{link.label}</a>
                   )
                 ))}
-                {isAdmin && <Link to="/label-center" activeOptions={{ exact: true }} activeProps={{ className: "bg-primary/15 text-primary" }} inactiveProps={{ className: "text-foreground/85" }} onClick={() => setOpen(false)} className="rounded-lg px-3 py-3 text-sm transition hover:bg-primary/10 hover:text-primary">Label Koper</Link>}
+                <Link to="/label-center" onClick={() => setOpen(false)} className="rounded-lg px-3 py-3 text-sm text-white/85 transition hover:bg-white/10 hover:text-gold">Label Koper</Link>
               </nav>
               <Button asChild variant="gold" className="mt-7 w-full"><a href={waLink("konsultasi paket umrah")} target="_blank" rel="noreferrer"><MessageCircle className="size-4" /> Hubungi Kami</a></Button>
               <p className="mt-5 text-xs text-white/45">{SITE.phoneDisplay}</p>
