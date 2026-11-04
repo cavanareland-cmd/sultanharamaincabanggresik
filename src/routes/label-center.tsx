@@ -15,6 +15,8 @@ type PublicJamaah = {
   label_color: string;
   label_status: string;
   sort_order: number;
+  gender: string | null;
+  room_group: string | null;
 };
 
 const publicDb = supabase as unknown as SupabaseClient<any>;
@@ -44,7 +46,7 @@ function PublicLabelCenterPage() {
     const load = async () => {
       const [{ data: authData }, { data, error: queryError }] = await Promise.all([
         supabase.auth.getUser(),
-        publicDb.from("jamaah_public").select("id,full_name,label_number,tour_leader,whatsapp_number,room_makkah,room_madinah,label_color,label_status,sort_order").order("sort_order").order("full_name"),
+        publicDb.from("jamaah_public").select("id,full_name,label_number,tour_leader,whatsapp_number,room_makkah,room_madinah,label_color,label_status,sort_order,gender,room_group").order("sort_order").order("full_name"),
       ]);
       let admin = false;
       if (authData.user) {
@@ -110,7 +112,7 @@ function PublicLabelCenterPage() {
           {loading ? <p className="py-10 text-center text-sm text-[#806b5e]">Memuat data jamaah...</p> : error ? <p className="py-10 text-center text-sm text-red-700">{error}</p> : filtered.length === 0 ? <p className="py-10 text-center text-sm text-[#806b5e]">Tidak ada jamaah yang cocok dengan pencarian.</p> : <div className="mt-4 max-h-[560px] space-y-2 overflow-y-auto">{filtered.map((person) => <button key={person.id} onClick={() => setSelectedId(person.id)} className={"flex w-full items-center justify-between gap-3 rounded-xl border p-3 text-left transition " + (selectedId === person.id ? "border-[#c69a4d] bg-[#fff8e8]" : "border-[#eee6df] hover:bg-[#faf6f3]")}><span className="min-w-0"><strong className="block truncate text-sm text-[#45230f]">{person.full_name}</strong><span className="mt-1 block text-xs text-[#8b7769]">No. Label: {person.label_number || "-"}</span></span><span className="shrink-0 rounded-lg bg-[#f4ece4] px-3 py-2 text-xs font-bold text-[#81531d]">Lihat</span></button>)}</div>}
         </section>
         <section className="rounded-2xl border border-[#eaded5] bg-white p-5 shadow-sm sm:p-7">
-          {selected ? <><div className="flex flex-wrap items-start justify-between gap-3"><div><span className="text-xs font-bold uppercase tracking-[.16em] text-[#98703b]">Detail Jamaah</span><h2 className="mt-2 text-2xl font-bold text-[#45230f]">{selected.full_name}</h2><p className="mt-1 text-sm text-[#8b7769]">Nomor label: {selected.label_number || "-"}</p></div><span className="rounded-full bg-[#edf5ee] px-3 py-1 text-xs font-bold text-[#17613b]">{selected.label_status || "Jamaah"}</span></div>
+          {selected ? <><div className="flex flex-wrap items-start justify-between gap-3"><div><span className="text-xs font-bold uppercase tracking-[.16em] text-[#98703b]">Detail Jamaah</span><h2 className="mt-2 text-2xl font-bold text-[#45230f]">{selected.full_name}</h2><p className="mt-1 text-sm text-[#8b7769]">Nomor label: {selected.label_number || "-"}</p><p className="mt-1 text-xs font-semibold text-[#98703b]">{selected.gender === "F" ? "Perempuan" : selected.gender === "M" ? "Laki-laki" : "Jenis kelamin belum diisi"} · {selected.room_group || "Kelompok kamar belum diisi"}</p></div><span className="rounded-full bg-[#edf5ee] px-3 py-1 text-xs font-bold text-[#17613b]">{selected.label_status || "Jamaah"}</span></div>
             <div className="mt-6 grid gap-3 sm:grid-cols-2"><div className="rounded-xl bg-[#faf6f3] p-4"><span className="text-xs text-[#8b7769]">Nomor WhatsApp</span><a href={selected.whatsapp_number ? "https://wa.me/" + selected.whatsapp_number.replace(/\D/g, "") : undefined} target="_blank" rel="noreferrer" className="mt-2 flex items-center gap-2 break-all text-sm font-bold text-[#17613b]"><MessageCircle className="size-4 shrink-0"/>{selected.whatsapp_number || "-"}</a></div><div className="rounded-xl bg-[#faf6f3] p-4"><span className="text-xs text-[#8b7769]">Ketua Rombongan</span><p className="mt-2 text-sm font-bold text-[#45230f]">{selected.tour_leader || "-"}</p></div><div className="rounded-xl border border-[#ead9bc] bg-[#fffaf0] p-4"><span className="text-xs text-[#8b7769]">Kamar Makkah</span><p className="mt-2 text-2xl font-bold text-[#81531d]">{selected.room_makkah || "-"}</p></div><div className="rounded-xl border border-[#ead9bc] bg-[#fffaf0] p-4"><span className="text-xs text-[#8b7769]">Kamar Madinah</span><p className="mt-2 text-2xl font-bold text-[#81531d]">{selected.room_madinah || "-"}</p></div></div>
             <div className="mt-6 flex flex-wrap gap-3"><button onClick={downloadLabel} className="inline-flex items-center gap-2 rounded-xl bg-[#17613b] px-5 py-3 text-sm font-bold text-white"><Download className="size-4"/> Download Label SVG</button>{selected.whatsapp_number && <a href={"https://wa.me/" + selected.whatsapp_number.replace(/\D/g, "")} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-xl border border-[#d9c7ae] px-5 py-3 text-sm font-bold text-[#65452e]"><MessageCircle className="size-4"/> Hubungi Jamaah</a>}</div>
           </> : <div className="flex min-h-72 flex-col items-center justify-center text-center text-[#806b5e]"><CalendarDays className="size-9"/><p className="mt-3 text-sm">Pilih nama jamaah untuk melihat informasi label dan kamar.</p></div>}
