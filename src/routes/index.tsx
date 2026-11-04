@@ -1,5 +1,5 @@
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { MessageCircle } from "lucide-react";
 
 import { Advantages } from "@/components/site/Advantages";
@@ -62,6 +62,12 @@ function Home() {
       <Navbar />
       <main>
         <Hero title={content["hero_title"] ?? "Perjalanan Ibadah Umrah Mewah & Bermakna"} subtitle={content["hero_subtitle"] ?? `${SITE.company} ${SITE.branch} - No. Izin PPIU ${SITE.ppiu}`} />
+        <section className="border-y border-[#d9c59f]/30 bg-gradient-to-r from-[#17130f] via-[#282016] to-[#17130f] px-5 py-7 sm:py-9">
+          <div className="mx-auto flex max-w-7xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div><span className="text-xs font-bold uppercase tracking-[.18em] text-[#d9b66f]">Layanan untuk Jamaah</span><h2 className="mt-2 font-display text-2xl font-semibold text-white sm:text-3xl">Label Koper & Informasi Kamar</h2><p className="mt-1 max-w-2xl text-sm text-white/70">Cari label koper, nomor WhatsApp, serta informasi kamar Makkah dan Madinah jamaah.</p></div>
+            <Link to="/label-center" className="inline-flex shrink-0 items-center justify-center rounded-full bg-[#d5b46e] px-6 py-3 text-sm font-bold text-[#39230e] transition hover:bg-[#e8ca88]">Buka Label Center</Link>
+          </div>
+        </section>
         <div className="sh-content-shell">
           <PackagesSection packages={data.packages} />
           <Advantages />
