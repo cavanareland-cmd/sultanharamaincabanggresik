@@ -25,6 +25,7 @@ export const Route = createFileRoute("/")({
       { title: TITLE }, { name: "description", content: DESCRIPTION },
       { property: "og:title", content: TITLE }, { property: "og:description", content: DESCRIPTION },
       { property: "og:url", content: CANONICAL }, { property: "og:site_name", content: `${SITE.company} ${SITE.branch}` },
+      { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [{ rel: "canonical", href: CANONICAL }],
     scripts: [
@@ -48,7 +49,7 @@ export const Route = createFileRoute("/")({
     ],
   }),
   component: Home,
-  errorComponent: ({ error }) => <div className="flex min-h-screen items-center justify-center p-6 text-center" role="alert"><p className="text-sm text-muted-foreground">{error.message}</p></div>,
+  errorComponent: ({ error }) => <div className="flex min-h-screen items-center justify-center p-6 text-center" role="alert"><p className="text-sm text-muted-foreground">{error instanceof Error ? error.message : "Halaman tidak dapat dimuat."}</p></div>,
   notFoundComponent: () => <div className="flex min-h-screen items-center justify-center p-6"><p className="text-sm text-muted-foreground">Konten belum tersedia.</p></div>,
 });
 
