@@ -46,6 +46,7 @@ function PublicLabelCenterPage() {
   const [draft, setDraft] = useState<Draft>({ name: "", number: "", leader: "", phone: "", makkah: "", madinah: "", color: "#b6a6d5", roomTitle: "ROOM NUMBER" });
   const [saving, setSaving] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const centerCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -132,6 +133,8 @@ function PublicLabelCenterPage() {
       ctx.save(); ctx.translate(155, 430); ctx.rotate(Math.PI); ctx.fillStyle = "#4b210d"; ctx.font = "italic bold 18px Georgia"; ctx.textAlign = "center"; ctx.fillText(draft.madinah || "Madinah", 0, 0, 210); ctx.restore();
       ctx.save(); ctx.translate(155, 595); ctx.rotate(Math.PI); ctx.fillStyle = "#4b210d"; ctx.font = "italic bold 18px Georgia"; ctx.textAlign = "center"; ctx.fillText(draft.makkah || "Mekah", 0, 0, 210); ctx.restore();
       ctx.save(); ctx.translate(155, 625); ctx.rotate(Math.PI); ctx.fillStyle = "#35190d"; ctx.font = "bold 42px Arial"; ctx.textAlign = "center"; ctx.fillText(draft.roomTitle, 0, 0, 250); ctx.restore();
+      const centerCanvas = centerCanvasRef.current;
+      if (centerCanvas) { centerCanvas.width = canvas.width; centerCanvas.height = canvas.height; const centerCtx = centerCanvas.getContext("2d"); centerCtx?.drawImage(canvas, 0, 0); }
     };
     image.onerror = () => setError("Template label koper tidak dapat dimuat.");
   }, [draft]);
@@ -221,7 +224,7 @@ function PublicLabelCenterPage() {
             <h2 className="mb-4 text-sm font-bold text-black">Preview</h2>
             <div className="grid grid-cols-3 items-start gap-2 sm:gap-3">
               <div className="overflow-hidden rounded-sm bg-white/40"><canvas ref={canvasRef} className="block h-auto w-full"/></div>
-              <div className="overflow-hidden rounded-sm bg-white/40"><canvas className="block h-auto w-full" ref={(node) => { if (node && canvasRef.current) { const ctx = node.getContext("2d"); if (ctx) { node.width = canvasRef.current.width; node.height = canvasRef.current.height; ctx.drawImage(canvasRef.current, 0, 0); } } }}/></div>
+              <div className="overflow-hidden rounded-sm bg-white/40"><canvas ref={centerCanvasRef} className="block h-auto w-full"/></div>
               <div className="flex min-h-[260px] flex-col items-center justify-center rounded-sm bg-[#b6a6d5] px-2 py-5 text-center text-[#35190d]"><span className="mb-5 text-xl font-black leading-tight">{draft.roomTitle}</span><div className="mb-3 w-full rounded-xl border-4 border-[#8b5b24] bg-white px-2 py-4 font-serif text-sm italic">{draft.madinah || "Madinah"}</div><div className="w-full rounded-xl border-4 border-[#4b210d] bg-white px-2 py-4 font-serif text-sm italic">{draft.makkah || "Mekah"}</div><span className="mt-5 text-[9px] font-bold">SULTAN BAROKAH HARAMAIN</span></div>
             </div>
             <h3 className="mb-3 mt-6 text-center text-sm font-bold text-black">Contoh Penggunaan</h3>
