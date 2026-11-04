@@ -3,16 +3,21 @@ import { BookOpen, CalendarDays, Check, ChevronLeft, ChevronRight, Download, Ima
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { JamaahDatabase } from "@/lib/jamaah.types";
+
+// Reuse the managed client and session; only extend the local schema typing.
+const jamaahClient = supabase as SupabaseClient<JamaahDatabase>;
 
 export const Route = createFileRoute("/_authenticated/label-center")({
   ssr: false,
-  head: () => ({ meta: [{ title: "Download Perlengkapan Jamaah | Sultan Haramain" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Download Perlengkapan Jamaah | Sultan Haramain" }, { name: "description", content: "Pengelolaan identitas dan label koper jamaah Sultan Haramain Gresik." }, { property: "og:title", content: "Perlengkapan Jamaah | Sultan Haramain Gresik" }, { property: "og:description", content: "Pengelolaan identitas dan label koper jamaah Sultan Haramain Gresik." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }, { name: "robots", content: "noindex" }] }),
   component: LabelCenterPage,
 });
 
 type Person = { id: string; name: string; number: string; leader: string; phone: string; status: string; labelColor: string; roomMakkah: string; roomMadinah: string };
 const initialPeople: Person[] = [];
-const colors = ["#4b210d", "#f4e8c9", "#d9ad54", "#a58acb", "#16733e", "#2789c9", "#24518b"];
+const colors = ["#4b210d", "#f4e8c9", "#d9ad54", "#a58acb", "#16733e", "#2789c9", "#24518b"] as const;
 
 function LabelCenterPage() {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
@@ -27,7 +32,7 @@ function LabelCenterPage() {
   const [phone, setPhone] = useState("");
   const [roomMakkah, setRoomMakkah] = useState("");
   const [roomMadinah, setRoomMadinah] = useState("");
-  const [labelColor, setLabelColor] = useState(colors[0]);
+  const [labelColor, setLabelColor] = useState<string>(colors[0]);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
@@ -37,7 +42,7 @@ function LabelCenterPage() {
       const { data: role } = await supabase.from("user_roles").select("role").eq("user_id", data.user.id).eq("role", "admin").maybeSingle();
       if (active) setIsAdmin(Boolean(role));
       if (role && active) {
-        const { data: rows, error } = await supabase.from("jamaah").select("*").order("sort_order").order("full_name");
+        const { data: rows, error } = await jamaahClient.from("jamaah").select("*").order("sort_order").order("full_name");
         if (error) { toast.error("Gagal memuat data jamaah: " + error.message); return; }
         if (!active) return;
         const mapped = (rows ?? []).map((row) => ({ id: row.id, name: row.full_name, number: row.label_number ?? "", leader: row.tour_leader, phone: row.whatsapp_number, status: row.label_status, labelColor: row.label_color, roomMakkah: row.room_makkah, roomMadinah: row.room_madinah }));
@@ -58,10 +63,11 @@ function LabelCenterPage() {
     const { data: userData } = await supabase.auth.getUser();
     const payload = { full_name: name.trim(), label_number: number.trim() || null, tour_leader: leader.trim(), whatsapp_number: phone.trim(), room_makkah: roomMakkah.trim(), room_madinah: roomMadinah.trim(), label_color: labelColor, label_status: "Selesai", updated_by: userData.user?.id ?? null };
     const result = selectedId
-      ? await supabase.from("jamaah").update(payload).eq("id", selectedId).select("*").single()
-      : await supabase.from("jamaah").insert({ ...payload, created_by: userData.user?.id ?? null }).select("*").single();
+      ? await jamaahClient.from("jamaah").update(payload).eq("id", selectedId).select("*").single()
+      : await jamaahClient.from("jamaah").insert({ ...payload, created_by: userData.user?.id ?? null }).select("*").single();
     if (result.error) { toast.error("Gagal menyimpan: " + result.error.message); return; }
     const row = result.data;
+    if (!row) { toast.error("Data jamaah belum dapat dibaca kembali."); return; }
     const savedPerson: Person = { id: row.id, name: row.full_name, number: row.label_number ?? "", leader: row.tour_leader, phone: row.whatsapp_number, status: row.label_status, labelColor: row.label_color, roomMakkah: row.room_makkah, roomMadinah: row.room_madinah };
     setPeople((rows) => selectedId ? rows.map((person) => person.id === selectedId ? savedPerson : person) : [...rows, savedPerson]);
     setSelectedId(row.id); setSaved(true); toast.success("Data jamaah berhasil disimpan ke database.");

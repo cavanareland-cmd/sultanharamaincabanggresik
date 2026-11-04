@@ -52,20 +52,42 @@ Add these in **Vercel → Project → Settings → Environment Variables**
 ### Client (build-time, inlined by Vite)
 | Name | Value |
 | --- | --- |
-| `VITE_SUPABASE_URL` | `https://hneqcitfaghtvubmtgad.supabase.co` |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | `sb_publishable_...` (publishable key — safe to commit) |
-| `VITE_SUPABASE_PROJECT_ID` | `hneqcitfaghtvubmtgad` |
+| `VITE_SUPABASE_URL` | URL of the user-selected canonical backend; use the same project as `supabase/config.toml` |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Actual publishable key issued by that same canonical project; never reuse a key from another project |
+| `VITE_SUPABASE_PROJECT_ID` | Project ID matching `supabase/config.toml` |
 
 ### Server (runtime, read by server functions)
 | Name | Value |
 | --- | --- |
-| `SUPABASE_URL` | `https://hneqcitfaghtvubmtgad.supabase.co` |
+| `SUPABASE_URL` | Same canonical backend URL as `VITE_SUPABASE_URL` |
 | `SUPABASE_PUBLISHABLE_KEY` | same publishable key as above |
 | `SUPABASE_SERVICE_ROLE_KEY` | **not available on Lovable Cloud** — see note below |
 
 > The publishable key is public by design (it's the anon/publishable key).
 > It is already committed in `.env`. The **service-role key is never exposed**
 > by Lovable Cloud and must NOT be invented or pasted.
+
+### Canonical connection audit (2026-11-04)
+
+`supabase/config.toml` reflects the user-selected canonical project, but this
+file does not switch Lovable's managed backend connection or regenerate its
+environment. The connection audit still reports the previous Lovable Cloud
+backend, and both the sandbox runtime and managed `.env` URL values do not
+match the canonical project. Canonical publishable-key ownership is unverified.
+
+The generated browser client already reads `VITE_SUPABASE_URL` and
+`VITE_SUPABASE_PUBLISHABLE_KEY`; it does not hardcode an active project URL or
+key. Do not edit the generated client or `.env` to simulate a connection change.
+Do not run environment rebinding against the old managed connection: it would
+restore that connection's values, not switch projects.
+
+An existing Lovable Cloud backend cannot be disconnected or replaced through
+this project's connection tools. Project Settings → Secrets is not a supported
+override for the reserved managed backend variables. External deployment
+environment settings can use the canonical project's actual URL and publishable
+key, but that does not change this Lovable project's backend connection. Keep
+frontend and server variables on the same project. No production deployment or
+publish was performed as part of this audit, and no old project or data was deleted.
 
 ### What works without the service-role key
 

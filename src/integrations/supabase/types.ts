@@ -10,34 +10,10 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.15"
   }
   public: {
     Tables: {
-      jamaah: {
-        Row: {
-          created_at: string; created_by: string | null; departure_date: string | null;
-          full_name: string; id: string; label_color: string; label_number: string | null;
-          label_status: string; notes: string; room_madinah: string; room_makkah: string;
-          sort_order: number; tour_leader: string; updated_at: string; updated_by: string | null;
-          whatsapp_number: string;
-        }
-        Insert: {
-          created_at?: string; created_by?: string | null; departure_date?: string | null;
-          full_name: string; id?: string; label_color?: string; label_number?: string | null;
-          label_status?: string; notes?: string; room_madinah?: string; room_makkah?: string;
-          sort_order?: number; tour_leader?: string; updated_at?: string; updated_by?: string | null;
-          whatsapp_number?: string;
-        }
-        Update: {
-          created_at?: string; created_by?: string | null; departure_date?: string | null;
-          full_name?: string; id?: string; label_color?: string; label_number?: string | null;
-          label_status?: string; notes?: string; room_madinah?: string; room_makkah?: string;
-          sort_order?: number; tour_leader?: string; updated_at?: string; updated_by?: string | null;
-          whatsapp_number?: string;
-        }
-        Relationships: []
-      }
       gallery_images: {
         Row: {
           caption: string | null
