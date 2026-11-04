@@ -244,6 +244,9 @@ function AdminPage() {
           </div>
           <div className="flex gap-2">
             <Button asChild variant="outlineGold" size="sm">
+              <Link to="/label-center">Label & Identitas</Link>
+            </Button>
+            <Button asChild variant="outlineGold" size="sm">
               <Link to="/">Lihat Website</Link>
             </Button>
             <Button variant="secondary" size="sm" onClick={signOut}>
