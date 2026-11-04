@@ -10,7 +10,7 @@ export const Route = createFileRoute("/_authenticated/label-center")({
   component: LabelCenterPage,
 });
 
-type Person = { id: string; name: string; number: string; leader: string; phone: string; status: string; labelColor: string };
+type Person = { id: string; name: string; number: string; leader: string; phone: string; status: string; labelColor: string; roomMakkah: string; roomMadinah: string };
 const initialPeople: Person[] = [];
 const colors = ["#4b210d", "#f4e8c9", "#d9ad54", "#a58acb", "#16733e", "#2789c9", "#24518b"];
 
