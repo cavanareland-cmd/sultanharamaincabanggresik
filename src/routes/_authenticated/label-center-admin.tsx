@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { BookOpen, CalendarDays, Check, ChevronLeft, ChevronRight, Download, Image as ImageIcon, Luggage, MessageCircle, Palette, Printer, RotateCcw, Save, Search, Settings2, ShieldCheck, Sparkles, Users, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -32,7 +32,9 @@ function LabelCenterPage() {
   const [phone, setPhone] = useState("");
   const [roomMakkah, setRoomMakkah] = useState("");
   const [roomMadinah, setRoomMadinah] = useState("");
-  const [labelColor, setLabelColor] = useState<string>(colors[0]);
+  const [labelColor, setLabelColor] = useState<string>("#b6a6d5");
+  const [roomTitle, setRoomTitle] = useState("ROOM NUMBER");
+  const previewCanvas = useRef<HTMLCanvasElement | null>(null);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
@@ -57,7 +59,7 @@ function LabelCenterPage() {
   const filtered = useMemo(() => people.filter((person) => person.name.toLowerCase().includes(search.toLowerCase()) || person.number.includes(search)), [people, search]);
   const choose = (person: Person) => { setSelectedId(person.id); setName(person.name); setNumber(person.number); setLeader(person.leader); setPhone(person.phone); setLabelColor(person.labelColor); setRoomMakkah(person.roomMakkah); setRoomMadinah(person.roomMadinah); setSaved(false); };
   const cancel = () => { if (selected) choose(selected); else { setName(""); setNumber(""); setLeader(""); setPhone(""); setRoomMakkah(""); setRoomMadinah(""); setLabelColor(colors[0]); } setSaved(false); toast.info("Perubahan dibatalkan."); };
-  const restore = () => { setLabelColor(colors[0]); toast.success("Warna template dikembalikan ke default."); };
+  const restore = () => { setLabelColor("#b6a6d5"); setRoomTitle("ROOM NUMBER"); toast.success("Warna dan teks template dikembalikan ke default."); };
   const save = async () => {
     if (!name.trim()) { toast.error("Nama jamaah wajib diisi."); return; }
     const { data: userData } = await supabase.auth.getUser();
@@ -73,18 +75,95 @@ function LabelCenterPage() {
     setSelectedId(row.id); setSaved(true); toast.success("Data jamaah berhasil disimpan ke database.");
   };
   const addPerson = () => { setSelectedId(""); setName(""); setNumber(""); setLeader(""); setPhone(""); setRoomMakkah(""); setRoomMadinah(""); setLabelColor(colors[0]); setSaved(false); };
+  const renderTemplate = () => {
+    const canvas = previewCanvas.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const image = new Image();
+    image.src = "/assets/label-koper-template.png";
+    image.onload = () => {
+      canvas.width = image.naturalWidth;
+      canvas.height = image.naturalHeight;
+      ctx.drawImage(image, 0, 0);
+      const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const target = labelColor.match(/[0-9a-f]{2}/gi)?.map((v) => parseInt(v, 16)) ?? [182,166,213];
+      for (let i = 0; i < pixels.data.length; i += 4) {
+        const rr = pixels.data[i], gg = pixels.data[i + 1], bb = pixels.data[i + 2];
+        if (bb > rr * 1.04 && bb > gg * 1.02 && rr > 135 && gg > 115 && bb > 150 && rr - gg < 45) {
+          pixels.data[i] = target[0]; pixels.data[i + 1] = target[1]; pixels.data[i + 2] = target[2];
+        }
+      }
+      ctx.putImageData(pixels, 0, 0);
+      ctx.fillStyle = "#2b1108";
+      ctx.fillRect(34, 1722, 242, 326);
+      ctx.textAlign = "left";
+      ctx.textBaseline = "alphabetic";
+      ctx.fillStyle = "#f4e5ca";
+      ctx.font = "bold 18px Arial";
+      ctx.fillText("BARANG INI", 44, 1752);
+      ctx.fillText("MILIK :", 44, 1772);
+      ctx.textAlign = "right";
+      ctx.fillStyle = "#e8b95e";
+      ctx.font = "bold 58px Arial";
+      ctx.fillText(number || "—", 270, 1772);
+      ctx.textAlign = "left";
+      ctx.fillStyle = "#f4e5ca";
+      ctx.font = "bold 29px Arial";
+      const nameWords = (name || "NAMA JAMAAH").split(/\\s+/);
+      let line = "", y = 1830;
+      for (const word of nameWords) {
+        const next = line ? line + " " + word : word;
+        if (ctx.measureText(next).width > 220 && line) { ctx.fillText(line, 44, y); y += 34; line = word; }
+        else line = next;
+      }
+      if (line) ctx.fillText(line, 44, y);
+      ctx.strokeStyle = "#c99b50";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(44, 1945); ctx.lineTo(270, 1945); ctx.stroke();
+      ctx.fillStyle = "#f4e5ca";
+      ctx.font = "bold 15px Arial";
+      ctx.textAlign = "left";
+      ctx.fillText("TL : " + (leader || "—"), 44, 1978, 225);
+      ctx.font = "bold 16px Arial";
+      ctx.fillText("☎ " + (phone || "—"), 44, 2020, 225);
+      ctx.save();
+      ctx.translate(155, 430);
+      ctx.rotate(Math.PI);
+      ctx.fillStyle = "#4b210d";
+      ctx.font = "italic bold 18px Georgia";
+      ctx.textAlign = "center";
+      ctx.fillText(roomMadinah || "Madinah", 0, 0, 210);
+      ctx.restore();
+      ctx.save();
+      ctx.translate(155, 595);
+      ctx.rotate(Math.PI);
+      ctx.fillStyle = "#4b210d";
+      ctx.font = "italic bold 18px Georgia";
+      ctx.textAlign = "center";
+      ctx.fillText(roomMakkah || "Mekah", 0, 0, 210);
+      ctx.restore();
+      ctx.save();
+      ctx.translate(155, 625);
+      ctx.rotate(Math.PI);
+      ctx.fillStyle = "#35190d";
+      ctx.font = "bold 42px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText(roomTitle, 0, 0, 250);
+      ctx.restore();
+    };
+    image.onerror = () => toast.error("Template Label Koper tidak dapat dimuat.");
+  };
+  useEffect(() => { renderTemplate(); }, [name, number, leader, phone, roomMakkah, roomMadinah, labelColor, roomTitle, view]);
+
   const download = () => {
-    const safe = (value: string) => value.replace(/[<>&"]/g, "");
-    const svg = [
-      '<svg xmlns="http://www.w3.org/2000/svg" width="900" height="2400" viewBox="0 0 900 2400">',
-      '<rect width="900" height="2400" fill="#f1e5c8"/><rect x="26" y="26" width="848" height="2348" rx="24" fill="none" stroke="#c39a4a" stroke-width="10"/>',
-      '<g transform="rotate(180 450 470)"><text x="450" y="210" text-anchor="middle" font-family="Georgia" font-size="100" font-weight="bold" fill="#4b210d">Room Number</text><rect x="150" y="320" width="600" height="180" rx="45" fill="white" stroke="#8a5a20" stroke-width="12"/><text x="450" y="430" text-anchor="middle" font-family="Georgia" font-size="55" fill="#4b210d">Madinah</text><rect x="150" y="540" width="600" height="180" rx="45" fill="white" stroke="#8a5a20" stroke-width="12"/><text x="450" y="650" text-anchor="middle" font-family="Georgia" font-size="55" fill="#4b210d">Mekah</text></g>',
-      '<text x="450" y="1100" text-anchor="middle" font-family="Arial" font-size="58" font-weight="bold" fill="#4b210d">SULTAN BAROKAH HARAMAIN</text><rect x="100" y="1170" width="700" height="90" rx="25" fill="#a82018"/><text x="450" y="1230" text-anchor="middle" font-family="Arial" font-size="48" fill="white">INDONESIA</text>',
-      '<rect x="50" y="1330" width="800" height="1000" rx="24" fill="' + labelColor + '"/><text x="110" y="1470" font-family="Arial" font-size="42" fill="#f6e8c9">BARANG INI MILIK:</text><text x="790" y="1490" text-anchor="end" font-family="Georgia" font-size="110" fill="#d9ad54">' + safe(number) + '</text><text x="110" y="1690" font-family="Arial" font-size="76" font-weight="bold" fill="#f6e8c9">' + safe(name) + '</text><text x="110" y="1870" font-family="Arial" font-size="38" fill="#f6e8c9">TL: ' + safe(leader) + '</text><text x="450" y="2180" text-anchor="middle" font-family="Arial" font-size="44" fill="#f6e8c9">' + safe(phone) + '</text></svg>'
-    ].join("");
-    const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml;charset=utf-8" }));
-    const anchor = document.createElement("a"); anchor.href = url; anchor.download = "label-koper-" + number + ".svg"; anchor.click(); URL.revokeObjectURL(url);
-    toast.success("File SVG berhasil diunduh.");
+    const canvas = previewCanvas.current;
+    if (!canvas) { toast.error("Preview template belum siap."); return; }
+    const anchor = document.createElement("a");
+    anchor.href = canvas.toDataURL("image/png");
+    anchor.download = "label-koper-" + (number || "jamaah") + ".png";
+    anchor.click();
+    toast.success("Label PNG siap cetak berhasil diunduh.");
   };
   const share = () => { const message = "Assalamu'alaikum, berikut detail label koper Umrah atas nama " + name + ", nomor " + number + ". Kontak: " + phone; window.open("https://wa.me/?text=" + encodeURIComponent(message), "_blank", "noopener,noreferrer"); };
 
@@ -102,8 +181,8 @@ function LabelCenterPage() {
         <div className="mb-6 flex flex-wrap items-center gap-4 rounded-2xl border border-[#f0dfc8] bg-[#fff7eb] px-4 py-3 text-[11px] font-semibold text-[#67452d]"><strong className="text-[#885a22]">Fitur Unggulan untuk Jamaah</strong><span className="inline-flex items-center gap-1"><Check className="size-4 text-emerald-700"/> Edit desain langsung</span><span className="inline-flex items-center gap-1"><Download className="size-4 text-emerald-700"/> Download PDF & SVG</span><span className="inline-flex items-center gap-1"><MessageCircle className="size-4 text-emerald-700"/> Share WhatsApp</span><span className="inline-flex items-center gap-1"><Printer className="size-4 text-emerald-700"/> Print layout</span><span className="inline-flex items-center gap-1"><ShieldCheck className="size-4 text-emerald-700"/> Data aman</span></div>
         <div className="grid items-start gap-5 xl:grid-cols-[.95fr_1.03fr_1.3fr]">
           <section className="rounded-2xl border border-[#eaded5] bg-white p-4 shadow-sm"><div className="mb-4 flex items-center justify-between"><h2 className="flex items-center gap-2 font-bold"><Users className="size-5 text-[#986021]"/>Daftar Jamaah</h2><span className="text-[10px] text-[#9a8171]">Database produksi</span></div><label className="relative block"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#91829a]"/><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Cari nama jamaah..." className="h-11 w-full rounded-xl border border-[#e8dfe4] pl-10 pr-3 text-sm outline-none focus:border-[#bd9149]"/></label><div className="mt-4 space-y-2">{filtered.map((person) => <button key={person.id} onClick={() => choose(person)} className={"flex w-full items-center gap-2 rounded-xl border p-2 text-left transition " + (selectedId === person.id ? "border-[#c69a4d] bg-[#fffaf0] shadow-sm" : "border-[#eee7e2] hover:border-[#d9c3a1]")}><span className="flex size-10 shrink-0 flex-col items-center justify-center rounded-lg border border-[#c59b50] bg-[#21140e] text-[9px] font-semibold text-[#e8c77e]">LABEL<strong className="text-base text-white">{person.number.padStart(2, "0")}</strong></span><span className="min-w-0 flex-1"><strong className="block truncate text-xs text-[#4b2d1c]">{person.name}</strong><span className="text-[10px] text-[#8b786d]">No. Label: {person.number}</span></span>{person.status === "Selesai" ? <Check className="size-4 text-emerald-600"/> : <span className="rounded-full bg-[#fff0dc] px-2 py-1 text-[9px] font-bold text-[#a65b19]">Belum</span>}</button>)}</div><div className="mt-4 flex items-center justify-between border-t border-[#f0e8e1] pt-3 text-xs text-[#8a796f]"><span>{filtered.length} jamaah</span><span className="flex items-center gap-2"><ChevronLeft className="size-4"/><b className="rounded bg-[#17623b] px-2 py-1 text-white">1</b>2&nbsp; 3<ChevronRight className="size-4"/></span></div><button onClick={addPerson} className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-[#d7a45c] bg-[#fffaf3] px-3 py-3 text-xs font-bold text-[#81521f]"><Download className="size-4"/>Tambah Jamaah</button></section>
-          <section className="overflow-hidden rounded-2xl border border-[#eaded5] bg-white shadow-sm"><div className="grid grid-cols-2 gap-1 border-b border-[#eee4dc] bg-[#fbf8f5] p-2 sm:grid-cols-4">{tabs.map(({ label, icon: Icon }) => <button key={label} onClick={() => setTab(label)} className={"flex min-h-10 items-center justify-center gap-1 rounded-lg px-2 text-[10px] font-bold sm:text-xs " + (tab === label ? "bg-[#17613b] text-white shadow" : "text-[#65564e] hover:bg-white")}><Icon className="size-4"/>{label}</button>)}</div>{tab === "Label Koper" ? <div className="p-4 sm:p-5"><h2 className="mb-5 flex items-center gap-2 font-bold"><Settings2 className="size-5"/>Edit Data Jama’ah</h2><div className="space-y-4"><label className="block text-sm font-semibold">Nama Jama’ah<input className={field} value={name} onChange={(event) => { setName(event.target.value); setSaved(false); }}/></label><label className="block text-sm font-semibold">Nomor Label Koper<input className={field} value={number} onChange={(event) => { setNumber(event.target.value); setSaved(false); }}/></label><label className="block text-sm font-semibold">Tour Leader<input className={field} value={leader} onChange={(event) => { setLeader(event.target.value); setSaved(false); }}/></label><label className="block text-sm font-semibold">Nomor WhatsApp<input className={field} value={phone} onChange={(event) => { setPhone(event.target.value); setSaved(false); }}/></label><div className="grid grid-cols-2 gap-3"><label className="block text-sm font-semibold">Kamar Mekah<input className={field} value={roomMakkah} onChange={(event) => { setRoomMakkah(event.target.value); setSaved(false); }}/></label><label className="block text-sm font-semibold">Kamar Madinah<input className={field} value={roomMadinah} onChange={(event) => { setRoomMadinah(event.target.value); setSaved(false); }}/></label></div><div><p className="text-sm font-semibold">Warna Label</p><div className="mt-3 flex flex-wrap gap-3">{colors.map((color) => <button key={color} title={color} onClick={() => { setLabelColor(color); setSaved(false); }} className={"size-7 rounded-full border-2 shadow-sm " + (labelColor === color ? "border-white ring-2 ring-[#b78a43]" : "border-white")} style={{ backgroundColor: color }}/>)}</div></div><div className="rounded-xl bg-[#f4f7fa] px-4 py-3 text-xs leading-relaxed text-[#596b80]">ⓘ Perubahan teks akan langsung terlihat pada preview. Data tersimpan di database produksi dan hanya dapat dikelola admin.</div></div></div> : <div className="min-h-[440px] p-5"><h2 className="font-bold">{tab}</h2><p className="mt-2 text-sm text-[#8b786d]">Area pengelolaan {tab.toLowerCase()} akan menggunakan pola editor dan preview yang sama.</p><div className="mt-6 rounded-xl border border-dashed border-[#ddc9aa] bg-[#fffaf2] p-8 text-center"><ImageIcon className="mx-auto size-9 text-[#b18a4c]"/><p className="mt-3 text-sm font-semibold">Editor {tab}</p><p className="mt-1 text-xs text-[#947e6c]">Modul disiapkan untuk tahap pengembangan berikutnya.</p></div></div>}</section>
-          <section className="rounded-2xl border border-[#e9e1e4] bg-[#f0edef] p-4 shadow-sm"><div className="mb-3 flex flex-wrap items-center justify-between gap-2"><h2 className="font-bold">Preview</h2><div className="flex rounded-lg bg-white p-1 text-[10px] font-bold">{["Preview", "Mockup", "Cetak"].map((mode) => <button key={mode} onClick={() => setView(mode)} className={"rounded-md px-2.5 py-2 " + (view === mode ? "bg-[#17613b] text-white" : "text-[#65564e]")}>{mode}</button>)}</div></div>{view === "Preview" ? <div className="grid grid-cols-3 gap-2"><div className="flex min-h-[420px] items-center justify-center rounded-lg bg-[#b8a8d6] p-2"><div className="flex h-[380px] w-full max-w-[112px] flex-col items-center justify-between rounded border-[3px] border-[#d8c28e] bg-[#f0e4c7] px-2 py-4 text-center shadow"><div className="w-full rotate-180"><p className="font-display text-lg font-bold leading-none text-[#4b210d]">Room<br/>Number</p><div className="mt-3 rounded-xl border-2 border-[#7b4d21] bg-white p-2 text-[10px] italic text-[#4b210d]">{roomMakkah || "Mekah"}</div><div className="mt-2 rounded-xl border-2 border-[#7b4d21] bg-white p-2 text-[10px] italic text-[#4b210d]">{roomMadinah || "Madinah"}</div></div><span className="text-[8px] font-bold text-[#4b210d]">SULTAN BAROKAH HARAMAIN</span></div></div><div className="flex min-h-[420px] items-center justify-center rounded-lg bg-[#b8a8d6] p-2"><div className="flex h-[380px] w-full max-w-[112px] flex-col items-center rounded border-[3px] border-[#d8c28e] bg-[#f0e4c7] px-1.5 pt-3 text-center shadow"><div className="text-[7px] font-black leading-tight text-[#4b210d]">♛<br/>SULTAN<br/>BAROKAH<br/>HARAMAIN</div><div className="mt-2 w-full rounded bg-[#a91f19] py-1 text-[7px] font-bold text-white">🇮🇩 INDONESIA</div><div className="mt-2 rounded-lg border-2 border-[#8b612f] bg-[#fff8e9] p-1 text-[6px] text-[#4b210d]">Jika menemukan tas ini harap hubungi nomor di bawah</div><div className="mt-2 w-full flex-1 rounded-t-lg px-1 pt-2 text-left text-[#f6e8c9]" style={{ backgroundColor: labelColor }}><div className="flex justify-between text-[7px] font-bold"><span>BARANG INI<br/>MILIK:</span><b className="text-lg text-[#e1b65d]">{number}</b></div><p className="mt-3 break-words text-[11px] font-black leading-tight">{name}</p><p className="mt-2 text-[6px]">TL: {leader}</p><p className="mt-4 border-t border-[#d7b77a] pt-2 text-[6px]">{phone}</p></div></div></div><div className="flex min-h-[420px] items-center justify-center rounded-lg bg-[#b8a8d6] p-2"><div className="flex h-[380px] w-full max-w-[112px] flex-col items-center justify-between rounded border-[3px] border-[#d8c28e] bg-[#f0e4c7] px-2 py-4 text-center shadow"><p className="font-display text-xl font-bold leading-none text-[#4b210d]">Room<br/>Number</p><div className="w-full space-y-2"><div className="rounded-xl border-2 border-[#7b4d21] bg-white p-3 text-[9px] italic text-[#4b210d]">Madinah</div><div className="rounded-xl border-2 border-[#7b4d21] bg-white p-3 text-[9px] italic text-[#4b210d]">Mekah</div></div><span className="text-[8px] font-bold text-[#4b210d]">SULTAN BAROKAH HARAMAIN</span></div></div></div> : view === "Mockup" ? <div className="flex min-h-[420px] items-center justify-center rounded-xl bg-gradient-to-br from-[#c9c2bb] to-[#716b65] p-5"><div className="relative h-[370px] w-[240px] rounded-[42px] border-[10px] border-[#252a30] bg-gradient-to-br from-[#4b535b] via-[#20272d] to-[#11161b] shadow-2xl"><div className="absolute left-1/2 top-5 h-7 w-28 -translate-x-1/2 rounded-b-2xl bg-[#11161b]"/><div className="absolute left-1/2 top-14 flex h-[270px] w-[108px] -translate-x-1/2 rotate-[3deg] flex-col items-center rounded-sm border-[4px] border-[#d8c28e] bg-[#f0e4c7] p-2 text-center shadow-xl"><p className="text-[9px] font-black text-[#4b210d]">SULTAN BAROKAH<br/>HARAMAIN</p><div className="mt-2 w-full bg-[#a91f19] py-1 text-[7px] font-bold text-white">INDONESIA</div><div className="mt-3 w-full flex-1 p-2 text-[8px] font-bold text-[#f6e8c9]" style={{ backgroundColor: labelColor }}>{number}<br/><span className="text-[10px]">{name}</span></div></div></div></div> : <div className="flex min-h-[420px] items-center justify-center rounded-xl bg-white p-5"><div className="w-[180px] border border-[#d4b77a] bg-[#f0e4c7] p-3 text-center shadow"><p className="font-bold text-[#4b210d]">SULTAN BAROKAH HARAMAIN</p><div className="mt-4 p-3 text-left text-[#f6e8c9]" style={{ backgroundColor: labelColor }}>NO: {number}<p className="mt-3 text-lg font-bold">{name}</p><p className="mt-2 text-[9px]">TL: {leader}</p><p className="mt-3 text-[9px]">{phone}</p></div></div></div>}<div className="mt-3 flex items-center justify-between text-[10px] text-[#786b70]"><span>{view === "Cetak" ? "Simulasi hasil cetak" : view === "Mockup" ? "Simulasi label pada koper" : "Desain label digital"}</span><span className="flex items-center gap-1"><Palette className="size-3"/>Live update</span></div></section>
+          <section className="overflow-hidden rounded-2xl border border-[#eaded5] bg-white shadow-sm"><div className="grid grid-cols-2 gap-1 border-b border-[#eee4dc] bg-[#fbf8f5] p-2 sm:grid-cols-4">{tabs.map(({ label, icon: Icon }) => <button key={label} onClick={() => setTab(label)} className={"flex min-h-10 items-center justify-center gap-1 rounded-lg px-2 text-[10px] font-bold sm:text-xs " + (tab === label ? "bg-[#17613b] text-white shadow" : "text-[#65564e] hover:bg-white")}><Icon className="size-4"/>{label}</button>)}</div>{tab === "Label Koper" ? <div className="p-4 sm:p-5"><h2 className="mb-5 flex items-center gap-2 font-bold"><Settings2 className="size-5"/>Edit Data Jama’ah</h2><div className="space-y-4"><label className="block text-sm font-semibold">Nama Jama’ah<input className={field} value={name} onChange={(event) => { setName(event.target.value); setSaved(false); }}/></label><label className="block text-sm font-semibold">Nomor Label Koper<input className={field} value={number} onChange={(event) => { setNumber(event.target.value); setSaved(false); }}/></label><label className="block text-sm font-semibold">Tour Leader<input className={field} value={leader} onChange={(event) => { setLeader(event.target.value); setSaved(false); }}/></label><label className="block text-sm font-semibold">Nomor WhatsApp<input className={field} value={phone} onChange={(event) => { setPhone(event.target.value); setSaved(false); }}/></label><div className="grid grid-cols-2 gap-3"><label className="block text-sm font-semibold">Kamar Mekah<input className={field} value={roomMakkah} onChange={(event) => { setRoomMakkah(event.target.value); setSaved(false); }}/></label><label className="block text-sm font-semibold">Kamar Madinah<input className={field} value={roomMadinah} onChange={(event) => { setRoomMadinah(event.target.value); setSaved(false); }}/></label></div><div><label className="block text-sm font-semibold">Warna Background Template<input type="color" value={labelColor} onChange={(event) => { setLabelColor(event.target.value); setSaved(false); }} className="mt-2 h-12 w-full cursor-pointer rounded-xl border border-[#e7ddd7] bg-white p-1"/></label><label className="mt-4 block text-sm font-semibold">Teks Judul Room Number<input className={field} value={roomTitle} onChange={(event) => setRoomTitle(event.target.value.toUpperCase())}/></label><p className="mt-2 text-[11px] text-[#8b7769]">Hanya teks dan warna latar yang dapat disesuaikan. Ornamen, logo, bingkai, dan elemen grafis mengikuti template asli.</p></div><div className="rounded-xl bg-[#f4f7fa] px-4 py-3 text-xs leading-relaxed text-[#596b80]">ⓘ Perubahan teks akan langsung terlihat pada preview. Data tersimpan di database produksi dan hanya dapat dikelola admin.</div></div></div> : <div className="min-h-[440px] p-5"><h2 className="font-bold">{tab}</h2><p className="mt-2 text-sm text-[#8b786d]">Area pengelolaan {tab.toLowerCase()} akan menggunakan pola editor dan preview yang sama.</p><div className="mt-6 rounded-xl border border-dashed border-[#ddc9aa] bg-[#fffaf2] p-8 text-center"><ImageIcon className="mx-auto size-9 text-[#b18a4c]"/><p className="mt-3 text-sm font-semibold">Editor {tab}</p><p className="mt-1 text-xs text-[#947e6c]">Modul disiapkan untuk tahap pengembangan berikutnya.</p></div></div>}</section>
+          <section className="rounded-2xl border border-[#e9e1e4] bg-[#f0edef] p-4 shadow-sm"><div className="mb-3 flex flex-wrap items-center justify-between gap-2"><h2 className="font-bold">Preview</h2><div className="flex rounded-lg bg-white p-1 text-[10px] font-bold">{["Preview", "Mockup", "Cetak"].map((mode) => <button key={mode} onClick={() => setView(mode)} className={"rounded-md px-2.5 py-2 " + (view === mode ? "bg-[#17613b] text-white" : "text-[#65564e]")}>{mode}</button>)}</div></div><div className="flex justify-center rounded-lg bg-[#e8e2ed] p-3"><canvas ref={previewCanvas} className="h-auto w-full max-w-[310px] rounded-md shadow-xl" style={{ aspectRatio: "310 / 2048" }}/></div><div className="mt-3 flex items-center justify-between text-[10px] text-[#786b70]"><span>{view === "Cetak" ? "Simulasi hasil cetak" : view === "Mockup" ? "Simulasi label pada koper" : "Desain label digital"}</span><span className="flex items-center gap-1"><Palette className="size-3"/>Live update</span></div></section>
         </div>
         <div className="sticky bottom-3 z-20 mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#ead8bd] bg-white/95 p-3 shadow-xl backdrop-blur"><div className="flex flex-wrap gap-2"><button onClick={cancel} className="inline-flex items-center gap-2 rounded-xl border border-[#d9a44f] px-4 py-3 text-xs font-bold text-[#88551c]"><X className="size-4"/>Batal</button><button onClick={restore} className="inline-flex items-center gap-2 rounded-xl border border-[#d9a44f] px-4 py-3 text-xs font-bold text-[#88551c]"><RotateCcw className="size-4"/>Restore Default</button></div><div className="flex flex-wrap gap-2"><button onClick={save} className="inline-flex items-center gap-2 rounded-xl bg-[#17613b] px-5 py-3 text-xs font-bold text-white"><Save className="size-4"/>{saved ? "Tersimpan" : "Simpan Perubahan"}</button><button onClick={download} className="inline-flex items-center gap-2 rounded-xl border border-[#d9a44f] px-4 py-3 text-xs font-bold text-[#70421d]"><Download className="size-4"/>Download SVG</button><button onClick={share} className="inline-flex items-center gap-2 rounded-xl bg-[#159b58] px-4 py-3 text-xs font-bold text-white"><MessageCircle className="size-4"/>Share WhatsApp</button></div></div>
         <p className="mt-4 text-center text-[10px] text-[#a18b7d]">Jamaah Identity & Label Center · Data terhubung ke Supabase produksi.</p>
