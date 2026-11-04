@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Perbaiki kesalahan tipe pratinjau dan verifikasi hasil tanpa publish produksi.
+- [x] Perbaiki kesalahan tipe pratinjau; pemeriksaan otomatis sukses, halaman utama tampil, dan halaman label dikenali tanpa publish produksi.
 
 - [x] Audit koneksi dan environment backend kanonik tanpa mengubah halaman atau menerbitkan produksi.
 - [x] Hilangkan referensi backend lama dari panduan konfigurasi aplikasi.
