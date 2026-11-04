@@ -27,6 +27,7 @@ create index if not exists jamaah_departure_date_idx on public.jamaah (departure
 create index if not exists jamaah_sort_order_idx on public.jamaah (sort_order, full_name);
 
 alter table public.jamaah enable row level security;
+revoke all on public.jamaah from anon;
 grant select, insert, update, delete on public.jamaah to authenticated;
 
 drop policy if exists "Admins can read jamaah" on public.jamaah;
