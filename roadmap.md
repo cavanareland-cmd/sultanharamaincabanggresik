@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Tambahkan menu Label Koper khusus admin di header desktop/mobile; tes aturan akses dan navigasi admin berhasil, pratinjau build OK, tanpa publish produksi.
+
 - [x] Perbaiki kesalahan tipe pratinjau; pemeriksaan otomatis sukses, halaman utama tampil, dan halaman label dikenali tanpa publish produksi.
 
 - [x] Audit koneksi dan environment backend kanonik tanpa mengubah halaman atau menerbitkan produksi.

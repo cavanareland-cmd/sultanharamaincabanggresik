@@ -12,3 +12,4 @@
 - Public service pages use dedicated TanStack routes with self-contained anchor navigation, preserving index-page CMS ownership.
 - Treat the managed backend connection and frontend/server environment as separate audit targets; config.toml alone does not rebind them, so never simulate a switch by editing generated clients or environment files.
 - Keep migration-backed schema extensions in local type modules and reuse the managed browser client; generated schema files must remain untouched and local types do not prove the table is deployed.
+- Admin-only header items use authenticated, RLS-scoped role reads and fail closed during verification or identity changes; menu visibility never replaces protected routes or database authorization.
