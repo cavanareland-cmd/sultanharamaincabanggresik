@@ -37,7 +37,8 @@ function LabelCenterPage() {
   const [roomTitle, setRoomTitle] = useState("ROOM NUMBER");
   const previewCanvas = useRef<HTMLCanvasElement | null>(null);
   const [saved, setSaved] = useState(false);
-  const [previewZoom, setPreviewZoom] = useState(1);\n  const [currentPage, setCurrentPage] = useState(1);
+  const [previewZoom, setPreviewZoom] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     let active = true;
@@ -58,7 +59,10 @@ function LabelCenterPage() {
   }, []);
 
   const selected = people.find((person) => person.id === selectedId);
-  const filtered = useMemo(() => people.filter((person) => person.name.toLowerCase().includes(search.toLowerCase()) || person.number.includes(search)), [people, search]);\n  const pageSize = 8;\n  const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));\n  const visiblePeople = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const filtered = useMemo(() => people.filter((person) => person.name.toLowerCase().includes(search.toLowerCase()) || person.number.includes(search)), [people, search]);
+  const pageSize = 8;
+  const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const visiblePeople = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
   const choose = (person: Person) => { setSelectedId(person.id); setName(person.name); setNumber(person.number); setLeader(person.leader); setPhone(person.phone); setLabelColor(person.labelColor); setRoomMakkah(person.roomMakkah); setRoomMadinah(person.roomMadinah); setSaved(false); };
   const cancel = () => { if (selected) choose(selected); else { setName(""); setNumber(""); setLeader(""); setPhone(""); setRoomMakkah(""); setRoomMadinah(""); setLabelColor("#b6a6d5"); } setSaved(false); toast.info("Perubahan dibatalkan."); };
   const restore = () => { setLabelColor("#b6a6d5"); setRoomTitle("ROOM NUMBER"); toast.success("Warna dan teks template dikembalikan ke default."); };
@@ -76,7 +80,8 @@ function LabelCenterPage() {
     setPeople((rows) => selectedId ? rows.map((person) => person.id === selectedId ? savedPerson : person) : [...rows, savedPerson]);
     setSelectedId(row.id); setSaved(true); toast.success("Data jamaah berhasil disimpan ke database.");
   };
-  const addPerson = () => { const used = new Set(people.map((person) => Number.parseInt(person.number, 10)).filter((value) => Number.isFinite(value) && value > 0)); let next = 1; while (used.has(next)) next += 1; setSelectedId(""); setName(""); setNumber(String(next).padStart(2, "0")); setLeader(""); setPhone(""); setRoomMakkah(""); setRoomMadinah(""); setLabelColor("#b6a6d5"); setSaved(false); };\n  const removePerson = async (person: Person) => { if (!window.confirm("Hapus data jamaah " + person.name + "?")) return; const { error } = await jamaahClient.from("jamaah").delete().eq("id", person.id); if (error) { toast.error("Gagal menghapus data: " + error.message); return; } setPeople((rows) => rows.filter((row) => row.id !== person.id)); if (selectedId === person.id) { setSelectedId(""); setName(""); setNumber(""); setLeader(""); setPhone(""); setRoomMakkah(""); setRoomMadinah(""); } toast.success("Data jamaah berhasil dihapus."); };
+  const addPerson = () => { const used = new Set(people.map((person) => Number.parseInt(person.number, 10)).filter((value) => Number.isFinite(value) && value > 0)); let next = 1; while (used.has(next)) next += 1; setSelectedId(""); setName(""); setNumber(String(next).padStart(2, "0")); setLeader(""); setPhone(""); setRoomMakkah(""); setRoomMadinah(""); setLabelColor("#b6a6d5"); setSaved(false); };
+  const removePerson = async (person: Person) => { if (!window.confirm("Hapus data jamaah " + person.name + "?")) return; const { error } = await jamaahClient.from("jamaah").delete().eq("id", person.id); if (error) { toast.error("Gagal menghapus data: " + error.message); return; } setPeople((rows) => rows.filter((row) => row.id !== person.id)); if (selectedId === person.id) { setSelectedId(""); setName(""); setNumber(""); setLeader(""); setPhone(""); setRoomMakkah(""); setRoomMadinah(""); } toast.success("Data jamaah berhasil dihapus."); };
   const renderTemplate = () => {
     const canvas = previewCanvas.current;
     if (!canvas) return;
