@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { BookOpen, CalendarDays, Download, ExternalLink, Eye, EyeOff, Image as ImageIcon, Pencil, Plus, Printer, Save, Trash2, Upload, X } from "lucide-react";
+import { BookOpen, CalendarDays, Download, ExternalLink, Image as ImageIcon, Pencil, Plus, Printer, Save, Trash2, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
