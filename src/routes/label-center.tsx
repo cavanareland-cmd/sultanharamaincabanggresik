@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { BookOpen, CalendarDays, Check, Download, Image as ImageIcon, Luggage, MessageCircle, Printer, Search, Settings2, ShieldCheck, Share2, Users } from "lucide-react";
+import { BookOpen, CalendarDays, Check, Download, Image as ImageIcon, Luggage, MessageCircle, Printer, Search, Settings2, ShieldCheck, Share2, Users, ZoomIn, ZoomOut } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -46,6 +46,7 @@ function PublicLabelCenterPage() {
   const [draft, setDraft] = useState<Draft>({ name: "", number: "", leader: "", phone: "", makkah: "", madinah: "", color: "#b6a6d5", roomTitle: "ROOM NUMBER" });
   const [saving, setSaving] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [previewZoom, setPreviewZoom] = useState(1);
 
   useEffect(() => {
     let active = true;
@@ -271,10 +272,9 @@ function PublicLabelCenterPage() {
           </section>
 
           <section className="min-w-0 rounded-2xl bg-[#eeebef] p-4 shadow-sm sm:p-5">
-            <h2 className="mb-4 text-sm font-bold text-black">Preview</h2>
-            <div className="flex justify-center overflow-hidden rounded-xl bg-white/70 px-3 py-5">
-              <canvas ref={canvasRef} className="block h-auto max-h-[min(1500px,88vh)] w-auto" aria-label="Preview label koper sesuai template resmi" />
-            </div>
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2"><h2 className="text-sm font-bold text-black">Preview</h2><span className="text-[10px] font-semibold text-[#786b70]">Scroll untuk menggeser area</span></div>
+            <div className="mb-2 flex items-center justify-between gap-2 rounded-lg bg-white px-2 py-1.5"><span className="text-[10px] font-semibold text-[#786b70]">Zoom preview</span><div className="flex items-center gap-1"><button type="button" onClick={() => setPreviewZoom((z) => Math.max(0.5, Math.round((z - 0.1) * 10) / 10))} aria-label="Zoom out" title="Zoom out" className="flex size-8 items-center justify-center rounded-md border border-[#e8dfd8] text-[#65452e] hover:bg-[#fff7eb]"><ZoomOut className="size-4"/></button><span className="w-12 text-center text-[10px] font-bold tabular-nums text-[#65452e]">{Math.round(previewZoom * 100)}%</span><button type="button" onClick={() => setPreviewZoom((z) => Math.min(2.5, Math.round((z + 0.1) * 10) / 10))} aria-label="Zoom in" title="Zoom in" className="flex size-8 items-center justify-center rounded-md border border-[#e8dfd8] text-[#65452e] hover:bg-[#fff7eb]"><ZoomIn className="size-4"/></button><button type="button" onClick={() => setPreviewZoom(1)} className="rounded-md px-2 py-2 text-[10px] font-bold text-[#17613b] hover:bg-[#f4f7f4]">Reset</button></div></div>
+            <div className="max-h-[75vh] overflow-auto rounded-xl bg-white/70 p-3"><div className="flex min-w-max justify-center"><canvas ref={canvasRef} className="block h-auto max-w-none" style={{ width: `${600 * previewZoom}px` }} aria-label="Preview label koper sesuai template resmi" /></div></div>
             <p className="mt-4 text-center text-xs font-semibold text-[#5f4a3a]">{draft.name || "Nama jamaah"} · No. {draft.number || "-"}</p>
           </section>
         </div>
