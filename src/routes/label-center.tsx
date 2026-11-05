@@ -108,58 +108,57 @@ function PublicLabelCenterPage() {
         }
       }
       ctx.putImageData(pixels, 0, 0);
-      // Keep the original artwork and its existing decorative room labels.
-      // Replace only the lower text panel, edge-to-edge, to avoid a second inset card.
-      const panelTop = Math.round(canvas.height * 0.79);
-      const panelBottom = Math.round(canvas.height * 0.985);
-      const panelLeft = Math.round(canvas.width * 0.08);
-      const panelWidth = Math.round(canvas.width * 0.84);
-      ctx.fillStyle = "#2b1208";
-      ctx.fillRect(panelLeft, panelTop, panelWidth, panelBottom - panelTop);
+      // Match the original luggage-label composition: write directly on the
+      // existing dark ornamental panel. Never paint a new rectangle over it.
+      const w = canvas.width;
+      const h = canvas.height;
+      const left = Math.round(w * 0.085);
+      const right = Math.round(w * 0.915);
+      const textWidth = right - left;
       ctx.textBaseline = "alphabetic";
       ctx.textAlign = "left";
-      ctx.fillStyle = "#f4e5ca";
-      ctx.font = "bold 15px Arial";
-      ctx.fillText("BARANG INI", panelLeft + 8, panelTop + 26);
-      ctx.fillText("MILIK :", panelLeft + 8, panelTop + 44);
+      ctx.fillStyle = "#f3e5ca";
+      ctx.font = "700 " + Math.round(w * 0.052) + "px Arial, sans-serif";
+      ctx.fillText("BARANG INI", left, Math.round(h * 0.755));
+      ctx.fillText("MILIK :", left, Math.round(h * 0.778));
       ctx.textAlign = "right";
       ctx.fillStyle = "#e8b95e";
-      ctx.font = "bold 48px Arial";
-      ctx.fillText(draft.number || "—", panelLeft + panelWidth - 8, panelTop + 48, 90);
+      ctx.font = "700 " + Math.round(w * 0.145) + "px Arial, sans-serif";
+      ctx.fillText(draft.number || "—", right, Math.round(h * 0.78), textWidth * 0.24);
       ctx.textAlign = "left";
-      ctx.fillStyle = "#f4e5ca";
+      ctx.fillStyle = "#f3e5ca";
       const words = (draft.name || "NAMA JAMAAH").trim().split(/\\s+/);
       let lines: string[] = [];
-      let fontSize = 27;
-      for (const size of [27, 25, 23, 21, 19]) {
-        ctx.font = "bold " + size + "px Arial";
+      let fontSize = Math.round(w * 0.073);
+      for (const size of [0.073, 0.067, 0.061, 0.055, 0.049]) {
+        ctx.font = "700 " + Math.round(w * size) + "px Arial, sans-serif";
         lines = [];
         let line = "";
         for (const word of words) {
           const next = line ? line + " " + word : word;
-          if (ctx.measureText(next).width > panelWidth - 18 && line) { lines.push(line); line = word; }
+          if (ctx.measureText(next).width > textWidth && line) { lines.push(line); line = word; }
           else line = next;
         }
         if (line) lines.push(line);
-        fontSize = size;
-        if (lines.length <= 3) break;
+        fontSize = Math.round(w * size);
+        if (lines.length <= 2) break;
       }
-      ctx.font = "bold " + fontSize + "px Arial";
-      const lineHeight = fontSize + 5;
-      const nameY = panelTop + 104;
-      lines.slice(0, 3).forEach((line, index) => ctx.fillText(line, panelLeft + 8, nameY + index * lineHeight, panelWidth - 16));
-      const footerY = Math.min(panelBottom - 52, nameY + Math.min(lines.length, 3) * lineHeight + 12);
+      ctx.font = "700 " + fontSize + "px Arial, sans-serif";
+      const nameY = Math.round(h * 0.835);
+      const lineHeight = Math.round(fontSize * 1.12);
+      lines.slice(0, 2).forEach((line, index) => ctx.fillText(line, left, nameY + index * lineHeight, textWidth));
+      const dividerY = Math.round(h * 0.875);
       ctx.strokeStyle = "#c99b50";
-      ctx.lineWidth = 1.5;
+      ctx.lineWidth = Math.max(1, w * 0.003);
       ctx.beginPath();
-      ctx.moveTo(panelLeft + 8, footerY);
-      ctx.lineTo(panelLeft + panelWidth - 8, footerY);
+      ctx.moveTo(left, dividerY);
+      ctx.lineTo(right, dividerY);
       ctx.stroke();
-      ctx.fillStyle = "#f4e5ca";
-      ctx.font = "bold 12px Arial";
-      ctx.fillText("TL : " + (draft.leader || "—"), panelLeft + 8, footerY + 22, panelWidth - 16);
-      ctx.font = "bold 13px Arial";
-      ctx.fillText("☎ " + (draft.phone || "—"), panelLeft + 8, footerY + 45, panelWidth - 16);
+      ctx.fillStyle = "#f3e5ca";
+      ctx.font = "700 " + Math.round(w * 0.034) + "px Arial, sans-serif";
+      ctx.fillText("TL : " + (draft.leader || "—"), left, Math.round(h * 0.898), textWidth);
+      ctx.font = "700 " + Math.round(w * 0.038) + "px Arial, sans-serif";
+      ctx.fillText("☎ " + (draft.phone || "—"), left, Math.round(h * 0.921), textWidth);
       const centerCanvas = centerCanvasRef.current;
       if (centerCanvas) { centerCanvas.width = canvas.width; centerCanvas.height = canvas.height; const centerCtx = centerCanvas.getContext("2d"); centerCtx?.drawImage(canvas, 0, 0); }
     };
