@@ -46,7 +46,6 @@ function PublicLabelCenterPage() {
   const [draft, setDraft] = useState<Draft>({ name: "", number: "", leader: "", phone: "", makkah: "", madinah: "", color: "#b6a6d5", roomTitle: "ROOM NUMBER" });
   const [saving, setSaving] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const centerCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -94,7 +93,7 @@ function PublicLabelCenterPage() {
     const image = new Image();
     image.src = "/assets/label-koper-template.png";
     image.onload = () => {
-      const ctx = canvas.getContext("2d");
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
       if (!ctx) return;
       canvas.width = image.naturalWidth;
       canvas.height = image.naturalHeight;
