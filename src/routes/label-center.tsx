@@ -46,7 +46,6 @@ function PublicLabelCenterPage() {
   const [draft, setDraft] = useState<Draft>({ name: "", number: "", leader: "", phone: "", makkah: "", madinah: "", color: "#b6a6d5", roomTitle: "ROOM NUMBER" });
   const [saving, setSaving] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const centerCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -94,78 +93,98 @@ function PublicLabelCenterPage() {
     const image = new Image();
     image.src = "/assets/label-koper-template.png";
     image.onload = () => {
-      const ctx = canvas.getContext("2d");
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
       if (!ctx) return;
       canvas.width = image.naturalWidth;
       canvas.height = image.naturalHeight;
       ctx.drawImage(image, 0, 0);
       const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const rgb = draft.color.match(/[0-9a-f]{2}/gi)?.map((v) => parseInt(v, 16)) ?? [182, 166, 213];
-      for (let i = 0; i < pixels.data.length; i += 4) {
-        const r = pixels.data[i], g = pixels.data[i + 1], b = pixels.data[i + 2];
+      const rgb = draft.color.match(/[0-9a-f]{2}/gi)?.map((v) => parseInt(v, 16)) ?? [];
+      const [cr = 182, cg = 166, cb = 213] = rgb;
+      const px = pixels.data;
+      for (let i = 0; i < px.length; i += 4) {
+        const r = px[i] ?? 0, g = px[i + 1] ?? 0, b = px[i + 2] ?? 0;
         if (b > r * 1.04 && b > g * 1.02 && r > 135 && g > 115 && b > 150 && r - g < 45) {
-          pixels.data[i] = rgb[0]; pixels.data[i + 1] = rgb[1]; pixels.data[i + 2] = rgb[2];
+          px[i] = cr; px[i + 1] = cg; px[i + 2] = cb;
         }
       }
       ctx.putImageData(pixels, 0, 0);
-      // Template artwork contains sample data in the lower luggage panel.
-      // Mask only those four text bands (never the ornamental side borders),
-      // then render each editable field once in its matching band.
-      const w = canvas.width;
-      const h = canvas.height;
-      const left = Math.round(w * 0.085);
-      const right = Math.round(w * 0.915);
-      const textWidth = right - left;
-      const y = (ratio: number) => Math.round(h * ratio);
+      // Geometry below is measured directly from the official template
+      // artwork (600 x 3960). Each editable field is drawn exactly once in
+      // the band where the baked-in sample data sits, so nothing overlaps.
+      const mask = (x0: number, y0: number, x1: number, y1: number) => {
+        ctx.fillStyle = "#2b1505";
+        ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
+      };
+      mask(40, 3264, 560, 3374); // "BARANG INI MILIK :" + nomor label
+      mask(60, 3416, 560, 3660); // nama jamaah (maks. 3 baris)
+      mask(50, 3786, 560, 3834); // tour leader
+      mask(152, 3858, 560, 3908); // nomor WhatsApp (ikon WA asli tetap)
+
       ctx.textBaseline = "alphabetic";
-      ctx.textAlign = "left";
-      ctx.fillStyle = "#35190d";
-      ctx.fillRect(left - 2, y(0.858), textWidth + 4, y(0.895) - y(0.858));
-      ctx.fillRect(left - 2, y(0.902), textWidth + 4, y(0.947) - y(0.902));
-      ctx.fillRect(left - 2, y(0.958), textWidth + 4, y(0.980) - y(0.958));
-      ctx.fillRect(left - 2, y(0.981), textWidth + 4, y(0.999) - y(0.981));
+      const cream = "#f1e2ca";
 
-      ctx.fillStyle = "#f3e5ca";
-      ctx.font = "700 " + Math.round(w * 0.052) + "px Arial, sans-serif";
-      ctx.fillText("BARANG INI", left, y(0.873));
-      ctx.fillText("MILIK :", left, y(0.891));
+      ctx.textAlign = "left";
+      ctx.fillStyle = cream;
+      ctx.font = "700 34px Arial, sans-serif";
+      ctx.fillText("BARANG INI", 49, 3308);
+      ctx.fillText("MILIK :", 50, 3347);
+
       ctx.textAlign = "right";
-      ctx.fillStyle = "#e8b95e";
-      ctx.font = "700 " + Math.round(w * 0.145) + "px Arial, sans-serif";
-      ctx.fillText(draft.number || "—", right, y(0.891), textWidth * 0.24);
+      ctx.fillStyle = "#f3ca71";
+      ctx.font = "700 118px Arial, sans-serif";
+      ctx.fillText(draft.number || "—", 552, 3364, 128);
 
       ctx.textAlign = "left";
-      ctx.fillStyle = "#f3e5ca";
+      ctx.fillStyle = cream;
       const words = (draft.name || "NAMA JAMAAH").trim().split(/\s+/);
+      const nameWidth = 478;
       let lines: string[] = [];
-      let fontSize = Math.round(w * 0.073);
-      for (const size of [0.073, 0.067, 0.061, 0.055, 0.049]) {
-        ctx.font = "700 " + Math.round(w * size) + "px Arial, sans-serif";
+      let fontSize = 66;
+      for (const size of [66, 61, 56, 50, 45, 40, 36]) {
+        ctx.font = "700 " + size + "px Arial, sans-serif";
         lines = [];
         let line = "";
         for (const word of words) {
           const next = line ? line + " " + word : word;
-          if (ctx.measureText(next).width > textWidth && line) { lines.push(line); line = word; }
+          if (ctx.measureText(next).width > nameWidth && line) { lines.push(line); line = word; }
           else line = next;
         }
         if (line) lines.push(line);
-        fontSize = Math.round(w * size);
-        if (lines.length <= 2) break;
+        fontSize = size;
+        if (lines.length <= 3) break;
       }
-      ctx.font = "700 " + fontSize + "px Arial, sans-serif";
-      const nameY = y(0.929);
-      const lineHeight = Math.round(fontSize * 1.12);
-      lines.slice(0, 2).forEach((line, index) => ctx.fillText(line, left, nameY + index * lineHeight, textWidth));
+      const nameTop = 3484;
+      const lineHeight = 80;
+      lines.slice(0, 3).forEach((line, index) => ctx.fillText(line, 84, nameTop + index * lineHeight));
 
-      ctx.fillStyle = "#c99b50";
-      ctx.fillRect(left, y(0.958), textWidth, Math.max(1, Math.round(w * 0.003)));
-      ctx.fillStyle = "#f3e5ca";
-      ctx.font = "700 " + Math.round(w * 0.034) + "px Arial, sans-serif";
-      ctx.fillText("TL : " + (draft.leader || "—"), left, y(0.974), textWidth);
-      ctx.font = "700 " + Math.round(w * 0.038) + "px Arial, sans-serif";
-      ctx.fillText("☎ " + (draft.phone || "—"), left, y(0.994), textWidth);
-      const centerCanvas = centerCanvasRef.current;
-      if (centerCanvas) { centerCanvas.width = canvas.width; centerCanvas.height = canvas.height; const centerCtx = centerCanvas.getContext("2d"); centerCtx?.drawImage(canvas, 0, 0); }
+      ctx.fillStyle = cream;
+      ctx.font = "700 30px Arial, sans-serif";
+      ctx.fillText("TL : " + (draft.leader || "—"), 63, 3820, 480);
+      ctx.font = "700 34px Arial, sans-serif";
+      ctx.fillText(draft.phone || "—", 159, 3897, 392);
+
+      // Kotak kamar berada di bagian atas label yang tercetak terbalik
+      // (rancangan asli template), jadi teksnya juga digambar terbalik.
+      const drawRoom = (value: string, cy: number) => {
+        const text = value.trim();
+        if (!text) return;
+        ctx.save();
+        ctx.translate(296, cy);
+        ctx.rotate(Math.PI);
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#35190d";
+        let roomSize = 58;
+        for (const size of [58, 52, 46, 40, 34]) {
+          ctx.font = "italic 700 " + size + "px Georgia, serif";
+          roomSize = size;
+          if (ctx.measureText(text).width <= 400) break;
+        }
+        ctx.fillText(text, 0, Math.round(roomSize * 0.36));
+        ctx.restore();
+      };
+      drawRoom(draft.makkah, 548);
+      drawRoom(draft.madinah, 868);
     };
     image.onerror = () => setError("Template label koper tidak dapat dimuat.");
   }, [draft]);
@@ -253,14 +272,10 @@ function PublicLabelCenterPage() {
 
           <section className="min-w-0 rounded-2xl bg-[#eeebef] p-4 shadow-sm sm:p-5">
             <h2 className="mb-4 text-sm font-bold text-black">Preview</h2>
-            <div className="grid grid-cols-3 items-start gap-2 sm:gap-3">
-              <div className="overflow-hidden rounded-sm bg-white/40"><canvas ref={canvasRef} className="block h-auto w-full"/></div>
-              <div className="overflow-hidden rounded-sm bg-white/40"><canvas ref={centerCanvasRef} className="block h-auto w-full"/></div>
-              <div className="flex min-h-[260px] flex-col items-center justify-center rounded-sm bg-[#b6a6d5] px-2 py-5 text-center text-[#35190d]"><span className="mb-5 text-xl font-black leading-tight">{draft.roomTitle}</span><div className="mb-3 w-full rounded-xl border-4 border-[#8b5b24] bg-white px-2 py-4 font-serif text-sm italic">{draft.madinah || "Madinah"}</div><div className="w-full rounded-xl border-4 border-[#4b210d] bg-white px-2 py-4 font-serif text-sm italic">{draft.makkah || "Mekah"}</div><span className="mt-5 text-[9px] font-bold">SULTAN BAROKAH HARAMAIN</span></div>
+            <div className="flex justify-center overflow-hidden rounded-xl bg-white/70 px-3 py-5">
+              <canvas ref={canvasRef} className="block h-auto max-h-[min(1500px,88vh)] w-auto" aria-label="Preview label koper sesuai template resmi" />
             </div>
-            <h3 className="mb-3 mt-6 text-center text-sm font-bold text-black">Contoh Penggunaan</h3>
-            <div className="overflow-hidden rounded-md bg-white"><img src="/assets/label-koper-template.png" alt="Template label koper Sultan Haramain" className="mx-auto max-h-72 w-auto object-contain"/></div>
-            <div className="mt-3 flex items-center justify-between gap-2 text-[10px] text-[#706777]"><span>{draft.name || "Nama jamaah"} · No. {draft.number || "-"}</span><span className="font-semibold">{selected?.room_group || "QUAD"}</span></div>
+            <p className="mt-4 text-center text-xs font-semibold text-[#5f4a3a]">{draft.name || "Nama jamaah"} · No. {draft.number || "-"}</p>
           </section>
         </div>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-xs text-[#8b7769]"><Link to="/" className="font-semibold text-[#81531d]">Kembali ke Beranda</Link>{isAdmin && <Link to="/label-center-admin" className="font-semibold text-[#17613b]">Buka pengelolaan lengkap admin</Link>}<span>· {people.length} data jamaah</span></div>
