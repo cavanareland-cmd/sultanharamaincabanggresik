@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { JamaahDatabase } from "@/lib/jamaah.types";
+import { LabelCenterModules } from "@/components/label-center-modules";
 
 type PublicJamaah = {
   id: string;
@@ -268,7 +269,7 @@ function PublicLabelCenterPage() {
                 {isAdmin && <button onClick={() => void save()} disabled={saving || !selected} className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#17613b] to-[#0f7041] text-sm font-bold text-white shadow-lg disabled:opacity-60"><Check className="size-5"/>{saving ? "Menyimpan..." : "Simpan Perubahan"}</button>}
                 <div className="grid grid-cols-2 gap-2"><button onClick={download} className="flex items-center justify-center gap-2 rounded-lg border border-[#c69a56] bg-white px-3 py-3 text-xs font-bold text-[#694a30]"><Download className="size-4"/>Download PNG</button><button onClick={share} className="flex items-center justify-center gap-2 rounded-lg bg-[#17613b] px-3 py-3 text-xs font-bold text-white"><MessageCircle className="size-4"/>Share WhatsApp</button></div>
               </div>
-            </div> : <div className="min-h-80 rounded-xl bg-white p-5"><h2 className="font-bold">{tab}</h2><p className="mt-2 text-sm text-[#806d61]">Konten {tab} akan ditampilkan di modul ini.</p></div>}
+            </div> : <LabelCenterModules tab={tab} isAdmin={isAdmin}/>}
           </section>
 
           <section className="min-w-0 rounded-2xl bg-[#eeebef] p-4 shadow-sm sm:p-5">
