@@ -72,7 +72,7 @@ function LabelCenterPage() {
     const payload = { full_name: name.trim(), label_number: number.trim() || null, tour_leader: leader.trim(), whatsapp_number: phone.trim(), room_makkah: roomMakkah.trim(), room_madinah: roomMadinah.trim(), label_color: labelColor, label_status: "Selesai", updated_by: userData.user?.id ?? null };
     const result = selectedId
       ? await jamaahClient.from("jamaah").update(payload).eq("id", selectedId).select("*").single()
-      : await jamaahClient.from("jamaah").insert({ ...payload, created_by: userData.user?.id ?? null }).select("*").single();
+      : await jamaahClient.from("jamaah").insert({ ...payload, sort_order: people.length, created_by: userData.user?.id ?? null }).select("*").single();
     if (result.error) { toast.error("Gagal menyimpan: " + result.error.message); return; }
     const row = result.data;
     if (!row) { toast.error("Data jamaah belum dapat dibaca kembali."); return; }
@@ -81,7 +81,7 @@ function LabelCenterPage() {
     setSelectedId(row.id); setSaved(true); toast.success("Data jamaah berhasil disimpan ke database.");
   };
   const addPerson = () => { const used = new Set(people.map((person) => Number.parseInt(person.number, 10)).filter((value) => Number.isFinite(value) && value > 0)); let next = 1; while (used.has(next)) next += 1; setSelectedId(""); setName(""); setNumber(String(next).padStart(2, "0")); setLeader(""); setPhone(""); setRoomMakkah(""); setRoomMadinah(""); setLabelColor("#b6a6d5"); setSaved(false); };
-  const removePerson = async (person: Person) => { if (!window.confirm("Hapus data jamaah " + person.name + "?")) return; const { error } = await jamaahClient.from("jamaah").delete().eq("id", person.id); if (error) { toast.error("Gagal menghapus data: " + error.message); return; } setPeople((rows) => rows.filter((row) => row.id !== person.id)); if (selectedId === person.id) { setSelectedId(""); setName(""); setNumber(""); setLeader(""); setPhone(""); setRoomMakkah(""); setRoomMadinah(""); } toast.success("Data jamaah berhasil dihapus."); };
+  const removePerson = async (person: Person) => { if (!window.confirm("Hapus data jamaah " + person.name + "?")) return; const { error } = await jamaahClient.from("jamaah").delete().eq("id", person.id); if (error) { toast.error("Gagal menghapus data: " + error.message); return; } setPeople((rows) => rows.filter((row) => row.id !== person.id)); setCurrentPage(1); if (selectedId === person.id) { setSelectedId(""); setName(""); setNumber(""); setLeader(""); setPhone(""); setRoomMakkah(""); setRoomMadinah(""); } toast.success("Data jamaah berhasil dihapus."); };
   const renderTemplate = () => {
     const canvas = previewCanvas.current;
     if (!canvas) return;
