@@ -108,26 +108,35 @@ function PublicLabelCenterPage() {
         }
       }
       ctx.putImageData(pixels, 0, 0);
-      // Match the original luggage-label composition: write directly on the
-      // existing dark ornamental panel. Never paint a new rectangle over it.
+      // Template artwork contains sample data in the lower luggage panel.
+      // Mask only those four text bands (never the ornamental side borders),
+      // then render each editable field once in its matching band.
       const w = canvas.width;
       const h = canvas.height;
       const left = Math.round(w * 0.085);
       const right = Math.round(w * 0.915);
       const textWidth = right - left;
+      const y = (ratio: number) => Math.round(h * ratio);
       ctx.textBaseline = "alphabetic";
       ctx.textAlign = "left";
+      ctx.fillStyle = "#35190d";
+      ctx.fillRect(left - 2, y(0.858), textWidth + 4, y(0.895) - y(0.858));
+      ctx.fillRect(left - 2, y(0.902), textWidth + 4, y(0.947) - y(0.902));
+      ctx.fillRect(left - 2, y(0.958), textWidth + 4, y(0.980) - y(0.958));
+      ctx.fillRect(left - 2, y(0.981), textWidth + 4, y(0.999) - y(0.981));
+
       ctx.fillStyle = "#f3e5ca";
       ctx.font = "700 " + Math.round(w * 0.052) + "px Arial, sans-serif";
-      ctx.fillText("BARANG INI", left, Math.round(h * 0.755));
-      ctx.fillText("MILIK :", left, Math.round(h * 0.778));
+      ctx.fillText("BARANG INI", left, y(0.873));
+      ctx.fillText("MILIK :", left, y(0.891));
       ctx.textAlign = "right";
       ctx.fillStyle = "#e8b95e";
       ctx.font = "700 " + Math.round(w * 0.145) + "px Arial, sans-serif";
-      ctx.fillText(draft.number || "—", right, Math.round(h * 0.78), textWidth * 0.24);
+      ctx.fillText(draft.number || "—", right, y(0.891), textWidth * 0.24);
+
       ctx.textAlign = "left";
       ctx.fillStyle = "#f3e5ca";
-      const words = (draft.name || "NAMA JAMAAH").trim().split(/\\s+/);
+      const words = (draft.name || "NAMA JAMAAH").trim().split(/\s+/);
       let lines: string[] = [];
       let fontSize = Math.round(w * 0.073);
       for (const size of [0.073, 0.067, 0.061, 0.055, 0.049]) {
@@ -144,21 +153,17 @@ function PublicLabelCenterPage() {
         if (lines.length <= 2) break;
       }
       ctx.font = "700 " + fontSize + "px Arial, sans-serif";
-      const nameY = Math.round(h * 0.835);
+      const nameY = y(0.929);
       const lineHeight = Math.round(fontSize * 1.12);
       lines.slice(0, 2).forEach((line, index) => ctx.fillText(line, left, nameY + index * lineHeight, textWidth));
-      const dividerY = Math.round(h * 0.875);
-      ctx.strokeStyle = "#c99b50";
-      ctx.lineWidth = Math.max(1, w * 0.003);
-      ctx.beginPath();
-      ctx.moveTo(left, dividerY);
-      ctx.lineTo(right, dividerY);
-      ctx.stroke();
+
+      ctx.fillStyle = "#c99b50";
+      ctx.fillRect(left, y(0.958), textWidth, Math.max(1, Math.round(w * 0.003)));
       ctx.fillStyle = "#f3e5ca";
       ctx.font = "700 " + Math.round(w * 0.034) + "px Arial, sans-serif";
-      ctx.fillText("TL : " + (draft.leader || "—"), left, Math.round(h * 0.898), textWidth);
+      ctx.fillText("TL : " + (draft.leader || "—"), left, y(0.974), textWidth);
       ctx.font = "700 " + Math.round(w * 0.038) + "px Arial, sans-serif";
-      ctx.fillText("☎ " + (draft.phone || "—"), left, Math.round(h * 0.921), textWidth);
+      ctx.fillText("☎ " + (draft.phone || "—"), left, y(0.994), textWidth);
       const centerCanvas = centerCanvasRef.current;
       if (centerCanvas) { centerCanvas.width = canvas.width; centerCanvas.height = canvas.height; const centerCtx = centerCanvas.getContext("2d"); centerCtx?.drawImage(canvas, 0, 0); }
     };
