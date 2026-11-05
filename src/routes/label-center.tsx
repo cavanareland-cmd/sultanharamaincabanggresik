@@ -99,11 +99,12 @@ function PublicLabelCenterPage() {
       canvas.height = image.naturalHeight;
       ctx.drawImage(image, 0, 0);
       const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const rgb = draft.color.match(/[0-9a-f]{2}/gi)?.map((v) => parseInt(v, 16)) ?? [182, 166, 213];
+      const rgb = draft.color.match(/[0-9a-f]{2}/gi)?.map((v) => parseInt(v, 16)) ?? [];
+      const [cr = 182, cg = 166, cb = 213] = rgb;
       for (let i = 0; i < pixels.data.length; i += 4) {
         const r = pixels.data[i], g = pixels.data[i + 1], b = pixels.data[i + 2];
         if (b > r * 1.04 && b > g * 1.02 && r > 135 && g > 115 && b > 150 && r - g < 45) {
-          pixels.data[i] = rgb[0]; pixels.data[i + 1] = rgb[1]; pixels.data[i + 2] = rgb[2];
+          pixels.data[i] = cr; pixels.data[i + 1] = cg; pixels.data[i + 2] = cb;
         }
       }
       ctx.putImageData(pixels, 0, 0);
