@@ -101,10 +101,11 @@ function PublicLabelCenterPage() {
       const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const rgb = draft.color.match(/[0-9a-f]{2}/gi)?.map((v) => parseInt(v, 16)) ?? [];
       const [cr = 182, cg = 166, cb = 213] = rgb;
-      for (let i = 0; i < pixels.data.length; i += 4) {
-        const r = pixels.data[i], g = pixels.data[i + 1], b = pixels.data[i + 2];
+      const px = pixels.data;
+      for (let i = 0; i < px.length; i += 4) {
+        const r = px[i] ?? 0, g = px[i + 1] ?? 0, b = px[i + 2] ?? 0;
         if (b > r * 1.04 && b > g * 1.02 && r > 135 && g > 115 && b > 150 && r - g < 45) {
-          pixels.data[i] = cr; pixels.data[i + 1] = cg; pixels.data[i + 2] = cb;
+          px[i] = cr; px[i + 1] = cg; px[i + 2] = cb;
         }
       }
       ctx.putImageData(pixels, 0, 0);
