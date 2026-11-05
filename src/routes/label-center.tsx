@@ -270,14 +270,10 @@ function PublicLabelCenterPage() {
 
           <section className="min-w-0 rounded-2xl bg-[#eeebef] p-4 shadow-sm sm:p-5">
             <h2 className="mb-4 text-sm font-bold text-black">Preview</h2>
-            <div className="grid grid-cols-3 items-start gap-2 sm:gap-3">
-              <div className="overflow-hidden rounded-sm bg-white/40"><canvas ref={canvasRef} className="block h-auto w-full"/></div>
-              <div className="overflow-hidden rounded-sm bg-white/40"><canvas ref={centerCanvasRef} className="block h-auto w-full"/></div>
-              <div className="flex min-h-[260px] flex-col items-center justify-center rounded-sm bg-[#b6a6d5] px-2 py-5 text-center text-[#35190d]"><span className="mb-5 text-xl font-black leading-tight">{draft.roomTitle}</span><div className="mb-3 w-full rounded-xl border-4 border-[#8b5b24] bg-white px-2 py-4 font-serif text-sm italic">{draft.madinah || "Madinah"}</div><div className="w-full rounded-xl border-4 border-[#4b210d] bg-white px-2 py-4 font-serif text-sm italic">{draft.makkah || "Mekah"}</div><span className="mt-5 text-[9px] font-bold">SULTAN BAROKAH HARAMAIN</span></div>
+            <div className="flex justify-center overflow-hidden rounded-xl bg-white/70 px-3 py-5">
+              <canvas ref={canvasRef} className="block h-auto max-h-[min(1500px,88vh)] w-auto" aria-label="Preview label koper sesuai template resmi" />
             </div>
-            <h3 className="mb-3 mt-6 text-center text-sm font-bold text-black">Contoh Penggunaan</h3>
-            <div className="overflow-hidden rounded-md bg-white"><img src="/assets/label-koper-template.png" alt="Template label koper Sultan Haramain" className="mx-auto max-h-72 w-auto object-contain"/></div>
-            <div className="mt-3 flex items-center justify-between gap-2 text-[10px] text-[#706777]"><span>{draft.name || "Nama jamaah"} · No. {draft.number || "-"}</span><span className="font-semibold">{selected?.room_group || "QUAD"}</span></div>
+            <p className="mt-4 text-center text-xs font-semibold text-[#5f4a3a]">{draft.name || "Nama jamaah"} · No. {draft.number || "-"}</p>
           </section>
         </div>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-xs text-[#8b7769]"><Link to="/" className="font-semibold text-[#81531d]">Kembali ke Beranda</Link>{isAdmin && <Link to="/label-center-admin" className="font-semibold text-[#17613b]">Buka pengelolaan lengkap admin</Link>}<span>· {people.length} data jamaah</span></div>
