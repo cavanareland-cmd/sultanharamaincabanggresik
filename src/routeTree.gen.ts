@@ -14,8 +14,9 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BadalUmrohRouteImport } from './routes/badal-umroh'
 import { Route as KarirRouteImport } from './routes/karir'
+import { Route as LabelCenterRouteImport } from './routes/label-center'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
-import { Route as AuthenticatedLabelCenterRouteImport } from './routes/_authenticated/label-center'
+import { Route as AuthenticatedLabelCenterAdminRouteImport } from './routes/_authenticated/label-center-admin'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -41,15 +42,20 @@ const KarirRoute = KarirRouteImport.update({
   path: '/karir',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LabelCenterRoute = LabelCenterRouteImport.update({
+  id: '/label-center',
+  path: '/label-center',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedLabelCenterRoute =
-  AuthenticatedLabelCenterRouteImport.update({
-    id: '/label-center',
-    path: '/label-center',
+const AuthenticatedLabelCenterAdminRoute =
+  AuthenticatedLabelCenterAdminRouteImport.update({
+    id: '/label-center-admin',
+    path: '/label-center-admin',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
@@ -58,16 +64,18 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/badal-umroh': typeof BadalUmrohRoute
   '/karir': typeof KarirRoute
+  '/label-center': typeof LabelCenterRoute
   '/admin': typeof AuthenticatedAdminRoute
-  '/label-center': typeof AuthenticatedLabelCenterRoute
+  '/label-center-admin': typeof AuthenticatedLabelCenterAdminRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/badal-umroh': typeof BadalUmrohRoute
   '/karir': typeof KarirRoute
+  '/label-center': typeof LabelCenterRoute
   '/admin': typeof AuthenticatedAdminRoute
-  '/label-center': typeof AuthenticatedLabelCenterRoute
+  '/label-center-admin': typeof AuthenticatedLabelCenterAdminRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -76,15 +84,29 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/badal-umroh': typeof BadalUmrohRoute
   '/karir': typeof KarirRoute
+  '/label-center': typeof LabelCenterRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
-  '/_authenticated/label-center': typeof AuthenticatedLabelCenterRoute
+  '/_authenticated/label-center-admin': typeof AuthenticatedLabelCenterAdminRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/badal-umroh' | '/karir' | '/admin' | '/label-center'
+    | '/'
+    | '/auth'
+    | '/badal-umroh'
+    | '/karir'
+    | '/label-center'
+    | '/admin'
+    | '/label-center-admin'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/badal-umroh' | '/karir' | '/admin' | '/label-center'
+  to:
+    | '/'
+    | '/auth'
+    | '/badal-umroh'
+    | '/karir'
+    | '/label-center'
+    | '/admin'
+    | '/label-center-admin'
   id:
     | '__root__'
     | '/'
@@ -92,8 +114,9 @@ export interface FileRouteTypes {
     | '/auth'
     | '/badal-umroh'
     | '/karir'
+    | '/label-center'
     | '/_authenticated/admin'
-    | '/_authenticated/label-center'
+    | '/_authenticated/label-center-admin'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -102,6 +125,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   BadalUmrohRoute: typeof BadalUmrohRoute
   KarirRoute: typeof KarirRoute
+  LabelCenterRoute: typeof LabelCenterRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -141,6 +165,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof KarirRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/label-center': {
+      id: '/label-center'
+      path: '/label-center'
+      fullPath: '/label-center'
+      preLoaderRoute: typeof LabelCenterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
       path: '/admin'
@@ -148,11 +179,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/label-center': {
-      id: '/_authenticated/label-center'
-      path: '/label-center'
-      fullPath: '/label-center'
-      preLoaderRoute: typeof AuthenticatedLabelCenterRouteImport
+    '/_authenticated/label-center-admin': {
+      id: '/_authenticated/label-center-admin'
+      path: '/label-center-admin'
+      fullPath: '/label-center-admin'
+      preLoaderRoute: typeof AuthenticatedLabelCenterAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
   }
@@ -160,12 +191,12 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
-  AuthenticatedLabelCenterRoute: typeof AuthenticatedLabelCenterRoute
+  AuthenticatedLabelCenterAdminRoute: typeof AuthenticatedLabelCenterAdminRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
-  AuthenticatedLabelCenterRoute: AuthenticatedLabelCenterRoute,
+  AuthenticatedLabelCenterAdminRoute: AuthenticatedLabelCenterAdminRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -177,6 +208,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   BadalUmrohRoute: BadalUmrohRoute,
   KarirRoute: KarirRoute,
+  LabelCenterRoute: LabelCenterRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
