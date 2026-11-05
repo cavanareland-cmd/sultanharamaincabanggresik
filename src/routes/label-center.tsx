@@ -231,7 +231,7 @@ function PublicLabelCenterPage() {
           <div className="flex flex-wrap items-center gap-0 overflow-hidden rounded-xl border border-[#f0dfc8] bg-[#fff7eb] text-[10px] font-semibold text-[#67452d] shadow-sm">
             <span className="px-4 py-3">Fitur Unggulan<br/>untuk Jamaah</span>
             <span className="border-l border-[#d8bd95] px-3 py-3"><Check className="mr-1 inline size-4 text-emerald-700"/>Edit Desain<br/>Langsung</span>
-            <span className="border-l border-[#d8bd95] px-3 py-3"><Download className="mr-1 inline size-4 text-emerald-700"/>Download<br/>PDF & PNG</span>
+            <span className="border-l border-[#d8bd95] px-3 py-3"><Download className="mr-1 inline size-4 text-emerald-700"/>Download<br/>PNG</span>
             <span className="border-l border-[#d8bd95] px-3 py-3"><Share2 className="mr-1 inline size-4 text-emerald-700"/>Share ke<br/>WhatsApp</span>
             <span className="border-l border-[#d8bd95] px-3 py-3"><Printer className="mr-1 inline size-4 text-emerald-700"/>Print Layout<br/>Profesional</span>
             <span className="border-l border-[#d8bd95] px-3 py-3"><ShieldCheck className="mr-1 inline size-4 text-emerald-700"/>Data Aman<br/>& Terpercaya</span>
