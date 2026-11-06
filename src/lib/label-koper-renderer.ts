@@ -13,8 +13,7 @@ export type LabelKoperData = {
   madinah: string;
 };
 
-const TEMPLATE_URL =
-  "https://sultanharamaincabanggresik.lovable.app/__l5e/assets-v1/2f152cbb-ae2f-4f0f-b9ad-6e1626d1fecc/label-koper-transparan.png";
+const TEMPLATE_URL = "/assets/label-koper-transparan.png";
 
 function wrapText(
   ctx: CanvasRenderingContext2D,
@@ -44,7 +43,6 @@ export function renderLabelKoper(
 ): () => void {
   let cancelled = false;
   const image = new Image();
-  image.crossOrigin = "anonymous";
   image.onload = () => {
     if (cancelled) return;
     const ctx = canvas.getContext("2d");
