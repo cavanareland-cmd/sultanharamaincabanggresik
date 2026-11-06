@@ -95,7 +95,7 @@ function LabelCenterPage() {
       madinah: roomMadinah,
     }, (message) => toast.error(message));
   };
-  useEffect(() => { renderTemplate(); }, [name, number, leader, phone, roomMakkah, roomMadinah, labelColor, roomTitle, view]);
+  useEffect(() => renderTemplate(), [name, number, leader, phone, roomMakkah, roomMadinah]);
 
   const download = () => {
     const canvas = previewCanvas.current;
