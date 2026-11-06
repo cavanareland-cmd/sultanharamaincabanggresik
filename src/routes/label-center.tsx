@@ -43,7 +43,7 @@ function PublicLabelCenterPage() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [tab, setTab] = useState("Label Koper");
   const [draft, setDraft] = useState<Draft>({ name: "", number: "", leader: "", phone: "", makkah: "", madinah: "", color: "#b6a6d5", roomTitle: "ROOM NUMBER" });
   const [saving, setSaving] = useState(false);
@@ -59,8 +59,17 @@ function PublicLabelCenterPage() {
       ]);
       let admin = false;
       if (auth.user) {
-        const { data: role } = await supabase.from("user_roles").select("role").eq("user_id", auth.user.id).eq("role", "admin").maybeSingle();
-        admin = Boolean(role);
+        const { data: role, error: roleError } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", auth.user.id)
+          .eq("role", "admin")
+          .maybeSingle();
+        if (roleError) {
+          console.error("[Label Center] Gagal memeriksa role admin:", roleError);
+          if (active) toast.error("Akses admin gagal diverifikasi. Silakan masuk ulang atau hubungi administrator.");
+        }
+        admin = Boolean(role && !roleError);
       }
       if (!active) return;
       setIsAdmin(admin);
@@ -177,7 +186,7 @@ function PublicLabelCenterPage() {
                 {([{ key: "name", label: "Nama Jama’ah", icon: Users }, { key: "number", label: "Nomor Label Koper", icon: Luggage }, { key: "leader", label: "Tour Leader", icon: Users }, { key: "phone", label: "Nomor Whatsapp", icon: MessageCircle }] as const).map(({ key, label, icon: Icon }) => <label key={key} className="block text-sm font-semibold text-black">{label}<span className="relative mt-2 block"><Icon className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-[#777086]"/><input value={draft[key]} onChange={(e) => update(key, e.target.value)} disabled={!isAdmin} className={inputClass + " pl-11"}/></span></label>)}
                 <div><span className="text-sm font-semibold text-black">Warna Label</span><div className="mt-3 flex flex-wrap items-center gap-2.5 rounded-lg bg-white/70 px-3 py-2">{palette.map((color) => <button key={color} type="button" onClick={() => isAdmin && update("color", color)} disabled={!isAdmin} aria-label={"Pilih warna " + color} title={color} className={"size-6 rounded-full border border-black/10 shadow-sm " + (draft.color.toLowerCase() === color.toLowerCase() ? "ring-2 ring-[#8b6846] ring-offset-2" : "")} style={{ backgroundColor: color }}/>) }<label className="ml-1 flex items-center gap-2 text-[11px] font-semibold text-[#6c5848]">Warna khusus<input aria-label="Pilih warna background label" type="color" value={/^#[0-9a-f]{6}$/i.test(draft.color) ? draft.color : "#b6a6d5"} onChange={(e) => update("color", e.target.value)} disabled={!isAdmin} className="h-8 w-10 cursor-pointer rounded border border-[#dfd3c6] bg-white p-0.5 disabled:cursor-not-allowed"/></label><span className="text-[10px] font-semibold uppercase tracking-wide text-[#806d61]">{draft.color}</span></div></div>
                 <div className="grid grid-cols-2 gap-3"><label className="block text-sm font-semibold text-black">Kamar Makkah<input value={draft.makkah} onChange={(e) => update("makkah", e.target.value)} disabled={!isAdmin} className={inputClass}/></label><label className="block text-sm font-semibold text-black">Kamar Madinah<input value={draft.madinah} onChange={(e) => update("madinah", e.target.value)} disabled={!isAdmin} className={inputClass}/></label></div>
-                <p className="text-[10px] leading-relaxed text-[#806d61]">{isAdmin ? "Edit teks dan warna latar, lalu simpan perubahan." : "Informasi jamaah ditampilkan untuk seluruh pengunjung. Pengubahan data hanya tersedia bagi admin."}</p>
+                <p className="text-[10px] leading-relaxed text-[#806d61]">{isAdmin === null ? "Sedang memeriksa akses akun..." : isAdmin ? "Mode admin aktif. Anda dapat mengedit data jamaah dan menyimpan perubahan." : "Mode publik: data dapat dilihat dan label dapat diunduh, tetapi formulir edit dikunci. Masuk menggunakan akun yang memiliki akses admin untuk mengubah data."}</p>{isAdmin === false && <Link to="/auth" className="mt-2 inline-flex min-h-10 items-center gap-2 rounded-lg border border-[#c69a56] bg-white px-3 py-2 text-xs font-bold text-[#70421d] hover:bg-[#fff8ed]"><ShieldCheck className="size-4"/>Masuk sebagai Admin</Link>}
                 {isAdmin && <button onClick={() => void save()} disabled={saving || !selected} className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#17613b] to-[#0f7041] text-sm font-bold text-white shadow-lg disabled:opacity-60"><Check className="size-5"/>{saving ? "Menyimpan..." : "Simpan Perubahan"}</button>}
                 <div className="grid grid-cols-2 gap-2"><button onClick={download} className="flex items-center justify-center gap-2 rounded-lg border border-[#c69a56] bg-white px-3 py-3 text-xs font-bold text-[#694a30]"><Download className="size-4"/>Download PNG</button><button onClick={() => window.print()} className="flex items-center justify-center gap-2 rounded-lg border border-[#c69a56] bg-white px-3 py-3 text-xs font-bold text-[#694a30]"><Printer className="size-4"/>Cetak</button><button onClick={share} className="col-span-2 flex items-center justify-center gap-2 rounded-lg bg-[#17613b] px-3 py-3 text-xs font-bold text-white"><MessageCircle className="size-4"/>Share WhatsApp</button></div>
               </div>
