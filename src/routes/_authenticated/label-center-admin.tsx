@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { JamaahDatabase } from "@/lib/jamaah.types";
 import { LabelCenterModules } from "@/components/label-center-modules";
+import { renderLabelKoper } from "@/lib/label-koper-renderer";
 
 // Reuse the managed client and session; only extend the local schema typing.
 const jamaahClient = supabase as SupabaseClient<JamaahDatabase>;
@@ -85,113 +86,14 @@ function LabelCenterPage() {
   const renderTemplate = () => {
     const canvas = previewCanvas.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    const image = new Image();
-    image.src = "/assets/label-koper-template.png";
-    image.onload = () => {
-      canvas.width = image.naturalWidth;
-      canvas.height = image.naturalHeight;
-      ctx.drawImage(image, 0, 0);
-      const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const target = labelColor.match(/[0-9a-f]{2}/gi)?.map((v) => parseInt(v, 16)) ?? [182,166,213];
-      for (let i = 0; i < pixels.data.length; i += 4) {
-        const rr = pixels.data[i], gg = pixels.data[i + 1], bb = pixels.data[i + 2];
-        if (bb > rr * 1.04 && bb > gg * 1.02 && rr > 135 && gg > 115 && bb > 150 && rr - gg < 45) {
-          pixels.data[i] = target[0]; pixels.data[i + 1] = target[1]; pixels.data[i + 2] = target[2];
-        }
-      }
-      ctx.putImageData(pixels, 0, 0);
-      // Replace only the inner writable panel; keep the original patterned side borders,
-      // gold frame, logos and decorative artwork from the supplied master image intact.
-      const panel = ctx.createLinearGradient(0, 1720, 0, 2048);
-      panel.addColorStop(0, "#321608");
-      panel.addColorStop(0.55, "#241006");
-      panel.addColorStop(1, "#180b05");
-      ctx.fillStyle = panel;
-      ctx.fillRect(30, 1718, 250, 330);
-      ctx.strokeStyle = "rgba(207,164,91,.42)";
-      ctx.lineWidth = 1;
-      ctx.strokeRect(35, 1724, 240, 318);
-      // Subtle geometric linework echoes the template without covering its border ornaments.
-      ctx.globalAlpha = 0.16;
-      ctx.strokeStyle = "#c99b50";
-      for (let y = 1810; y < 2040; y += 34) {
-        ctx.beginPath(); ctx.moveTo(42, y); ctx.lineTo(268, y); ctx.stroke();
-      }
-      ctx.globalAlpha = 1;
-      ctx.textBaseline = "alphabetic";
-      ctx.textAlign = "left";
-      ctx.fillStyle = "#f4e5ca";
-      ctx.font = "bold 17px Arial";
-      ctx.fillText("BARANG INI", 43, 1753);
-      ctx.fillText("MILIK :", 43, 1774);
-      ctx.textAlign = "right";
-      ctx.fillStyle = "#e8b95e";
-      ctx.font = "bold 56px Arial";
-      ctx.fillText(number || "—", 268, 1777, 108);
-      ctx.textAlign = "left";
-      ctx.fillStyle = "#f4e5ca";
-      const nameWords = (name || "NAMA JAMAAH").trim().split(/\s+/);
-      const nameLines: string[] = [];
-      let nameLine = "";
-      let nameFont = 28;
-      const maxNameWidth = 220;
-      for (const candidateSize of [28, 26, 24, 22, 20]) {
-        ctx.font = "bold " + candidateSize + "px Arial";
-        nameLines.length = 0;
-        nameLine = "";
-        for (const word of nameWords) {
-          const candidate = nameLine ? nameLine + " " + word : word;
-          if (ctx.measureText(candidate).width > maxNameWidth && nameLine) {
-            nameLines.push(nameLine);
-            nameLine = word;
-          } else nameLine = candidate;
-        }
-        if (nameLine) nameLines.push(nameLine);
-        nameFont = candidateSize;
-        if (nameLines.length <= 3) break;
-      }
-      ctx.font = "bold " + nameFont + "px Arial";
-      const nameStartY = 1835;
-      const nameLineHeight = Math.min(34, nameFont + 7);
-      nameLines.slice(0, 3).forEach((text, index) => ctx.fillText(text, 43, nameStartY + index * nameLineHeight));
-      const footerY = Math.max(1944, nameStartY + Math.min(nameLines.length, 3) * nameLineHeight + 12);
-      ctx.strokeStyle = "#c99b50";
-      ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.moveTo(43, footerY); ctx.lineTo(268, footerY); ctx.stroke();
-      ctx.fillStyle = "#f4e5ca";
-      ctx.font = "bold 13px Arial";
-      ctx.textAlign = "left";
-      ctx.fillText("TL : " + (leader || "—"), 43, footerY + 28, 225);
-      ctx.font = "bold 14px Arial";
-      ctx.fillText("☎ " + (phone || "—"), 43, footerY + 62, 225);
-      ctx.save();
-      ctx.translate(155, 430);
-      ctx.rotate(Math.PI);
-      ctx.fillStyle = "#4b210d";
-      ctx.font = "italic bold 18px Georgia";
-      ctx.textAlign = "center";
-      ctx.fillText(roomMadinah || "Madinah", 0, 0, 210);
-      ctx.restore();
-      ctx.save();
-      ctx.translate(155, 595);
-      ctx.rotate(Math.PI);
-      ctx.fillStyle = "#4b210d";
-      ctx.font = "italic bold 18px Georgia";
-      ctx.textAlign = "center";
-      ctx.fillText(roomMakkah || "Mekah", 0, 0, 210);
-      ctx.restore();
-      ctx.save();
-      ctx.translate(155, 625);
-      ctx.rotate(Math.PI);
-      ctx.fillStyle = "#35190d";
-      ctx.font = "bold 42px Arial";
-      ctx.textAlign = "center";
-      ctx.fillText(roomTitle, 0, 0, 250);
-      ctx.restore();
-    };
-    image.onerror = () => toast.error("Template Label Koper tidak dapat dimuat.");
+    return renderLabelKoper(canvas, {
+      name,
+      number,
+      leader,
+      phone,
+      makkah: roomMakkah,
+      madinah: roomMadinah,
+    }, (message) => toast.error(message));
   };
   useEffect(() => { renderTemplate(); }, [name, number, leader, phone, roomMakkah, roomMadinah, labelColor, roomTitle, view]);
 
@@ -221,7 +123,7 @@ function LabelCenterPage() {
         <div className="grid items-start gap-5 xl:grid-cols-[.95fr_1.03fr_1.3fr]">
           <section className="rounded-2xl border border-[#eaded5] bg-white p-4 shadow-sm"><div className="mb-4 flex items-center justify-between"><h2 className="flex items-center gap-2 font-bold"><Users className="size-5 text-[#986021]"/>Daftar Jamaah</h2><span className="text-[10px] text-[#9a8171]">Database produksi</span></div><label className="relative block"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[#91829a]"/><input value={search} onChange={(event) => { setSearch(event.target.value); setCurrentPage(1); }} placeholder="Cari nama jamaah..." className="h-11 w-full rounded-xl border border-[#e8dfe4] pl-10 pr-3 text-sm outline-none focus:border-[#bd9149]"/></label><div className="mt-4 space-y-2">{visiblePeople.map((person) => <div key={person.id} className={"flex items-center gap-1 rounded-xl border p-1 " + (selectedId === person.id ? "border-[#c69a4d] bg-[#fffaf0] shadow-sm" : "border-[#eee7e2]")}><button onClick={() => choose(person)} className="flex min-w-0 flex-1 items-center gap-2 p-1 text-left"><span className="flex size-10 shrink-0 flex-col items-center justify-center rounded-lg border border-[#c59b50] bg-[#21140e] text-[9px] font-semibold text-[#e8c77e]">LABEL<strong className="text-base text-white">{person.number ? person.number.padStart(2, "0") : "—"}</strong></span><span className="min-w-0 flex-1"><strong className="block truncate text-xs text-[#4b2d1c]">{person.name}</strong><span className="text-[10px] text-[#8b786d]">No. Label: {person.number || "Belum ada"}</span></span>{person.status === "Selesai" ? <Check className="size-4 text-emerald-600"/> : <span className="rounded-full bg-[#fff0dc] px-2 py-1 text-[9px] font-bold text-[#a65b19]">Belum</span>}</button><button type="button" onClick={() => void removePerson(person)} title={"Hapus " + person.name} aria-label={"Hapus " + person.name} className="rounded-lg p-2 text-red-600 hover:bg-red-50"><Trash2 className="size-4"/></button></div>)}</div><div className="mt-4 flex items-center justify-between border-t border-[#f0e8e1] pt-3 text-xs text-[#8a796f]"><span>{filtered.length} jamaah · Halaman {currentPage}/{pageCount}</span><span className="flex items-center gap-2"><button type="button" disabled={currentPage <= 1} onClick={() => setCurrentPage((page) => Math.max(1, page - 1))} className="rounded p-1 disabled:opacity-30" aria-label="Halaman sebelumnya"><ChevronLeft className="size-4"/></button><button type="button" disabled={currentPage >= pageCount} onClick={() => setCurrentPage((page) => Math.min(pageCount, page + 1))} className="rounded p-1 disabled:opacity-30" aria-label="Halaman berikutnya"><ChevronRight className="size-4"/></button></span></div><button onClick={addPerson} className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-[#d7a45c] bg-[#fffaf3] px-3 py-3 text-xs font-bold text-[#81521f]"><Download className="size-4"/>Tambah Jamaah</button></section>
           <section className="overflow-hidden rounded-2xl border border-[#eaded5] bg-white shadow-sm"><div className="grid grid-cols-2 gap-1 border-b border-[#eee4dc] bg-[#fbf8f5] p-2 sm:grid-cols-4">{tabs.map(({ label, icon: Icon }) => <button key={label} onClick={() => setTab(label)} className={"flex min-h-10 items-center justify-center gap-1 rounded-lg px-2 text-[10px] font-bold sm:text-xs " + (tab === label ? "bg-[#17613b] text-white shadow" : "text-[#65564e] hover:bg-white")}><Icon className="size-4"/>{label}</button>)}</div>{tab === "Label Koper" ? <div className="p-4 sm:p-5"><h2 className="mb-5 flex items-center gap-2 font-bold"><Settings2 className="size-5"/>Edit Data Jama’ah</h2><div className="space-y-4"><label className="block text-sm font-semibold">Nama Jama’ah<input className={field} value={name} onChange={(event) => { setName(event.target.value); setSaved(false); }}/></label><label className="block text-sm font-semibold">Nomor Label Koper<input className={field} value={number} onChange={(event) => { setNumber(event.target.value); setSaved(false); }}/></label><label className="block text-sm font-semibold">Tour Leader<input className={field} value={leader} onChange={(event) => { setLeader(event.target.value); setSaved(false); }}/></label><label className="block text-sm font-semibold">Nomor WhatsApp<input className={field} value={phone} onChange={(event) => { setPhone(event.target.value); setSaved(false); }}/></label><div className="grid grid-cols-2 gap-3"><label className="block text-sm font-semibold">Kamar Mekah<input className={field} value={roomMakkah} onChange={(event) => { setRoomMakkah(event.target.value); setSaved(false); }}/></label><label className="block text-sm font-semibold">Kamar Madinah<input className={field} value={roomMadinah} onChange={(event) => { setRoomMadinah(event.target.value); setSaved(false); }}/></label></div><div><label className="block text-sm font-semibold">Warna Background Template<input type="color" value={labelColor} onChange={(event) => { setLabelColor(event.target.value); setSaved(false); }} className="mt-2 h-12 w-full cursor-pointer rounded-xl border border-[#e7ddd7] bg-white p-1"/></label><label className="mt-4 block text-sm font-semibold">Teks Judul Room Number<input className={field} value={roomTitle} onChange={(event) => setRoomTitle(event.target.value.toUpperCase())}/></label><p className="mt-2 text-[11px] text-[#8b7769]">Hanya teks dan warna latar yang dapat disesuaikan. Ornamen, logo, bingkai, dan elemen grafis mengikuti template asli.</p></div><div className="rounded-xl bg-[#f4f7fa] px-4 py-3 text-xs leading-relaxed text-[#596b80]">ⓘ Perubahan teks akan langsung terlihat pada preview. Data tersimpan di database produksi dan hanya dapat dikelola admin.</div></div></div> : <LabelCenterModules tab={tab} isAdmin={true}/>}</section>
-          <section className="min-w-0 rounded-2xl border border-[#e9e1e4] bg-[#f0edef] p-4 shadow-sm"><div className="mb-3 flex flex-wrap items-center justify-between gap-2"><h2 className="font-bold">Preview</h2><div className="flex rounded-lg bg-white p-1 text-[10px] font-bold">{["Preview", "Mockup", "Cetak"].map((mode) => <button key={mode} onClick={() => setView(mode)} className={"rounded-md px-2.5 py-2 " + (view === mode ? "bg-[#17613b] text-white" : "text-[#65564e]")}>{mode}</button>)}</div></div><div className="mb-2 flex items-center justify-between gap-2 rounded-lg bg-white px-2 py-1.5"><span className="text-[10px] font-semibold text-[#786b70]">Perbesar / perkecil preview</span><div className="flex items-center gap-1"><button type="button" onClick={() => setPreviewZoom((z) => Math.max(0.5, Math.round((z - 0.1) * 10) / 10))} aria-label="Zoom out" title="Zoom out" className="flex size-8 items-center justify-center rounded-md border border-[#e8dfd8] text-[#65452e] hover:bg-[#fff7eb]"><ZoomOut className="size-4"/></button><span className="w-12 text-center text-[10px] font-bold tabular-nums text-[#65452e]">{Math.round(previewZoom * 100)}%</span><button type="button" onClick={() => setPreviewZoom((z) => Math.min(2.5, Math.round((z + 0.1) * 10) / 10))} aria-label="Zoom in" title="Zoom in" className="flex size-8 items-center justify-center rounded-md border border-[#e8dfd8] text-[#65452e] hover:bg-[#fff7eb]"><ZoomIn className="size-4"/></button><button type="button" onClick={() => setPreviewZoom(1)} className="rounded-md px-2 py-2 text-[10px] font-bold text-[#17613b] hover:bg-[#f4f7f4]">Reset</button></div></div><div className={"max-h-[75vh] overflow-auto rounded-lg p-3 " + (view === "Cetak" ? "bg-white" : view === "Mockup" ? "bg-gradient-to-br from-[#35241a] via-[#5c4030] to-[#21160f]" : "bg-[#e8e2ed]")}><div className={"flex min-w-max justify-center " + (view === "Mockup" ? "rounded-[28px] bg-[#4b3528] p-8 shadow-inner" : "p-1")}><canvas ref={previewCanvas} className={"block h-auto max-w-none " + (view === "Mockup" ? "rounded-lg shadow-2xl ring-4 ring-[#b98a42]" : view === "Cetak" ? "rounded-none shadow-none" : "rounded-md shadow-xl")} style={{ width: `${310 * previewZoom}px`, aspectRatio: "310 / 2048" }}/></div></div><div className="mt-3 flex items-center justify-between text-[10px] text-[#786b70]"><span>{view === "Cetak" ? "Simulasi hasil cetak" : view === "Mockup" ? "Simulasi label pada koper" : "Desain label digital"}</span><span className="flex items-center gap-1"><Palette className="size-3"/>Live update</span></div></section>
+          <section className="min-w-0 rounded-2xl border border-[#e9e1e4] bg-[#f0edef] p-4 shadow-sm"><div className="mb-3 flex flex-wrap items-center justify-between gap-2"><h2 className="font-bold">Preview</h2><div className="flex rounded-lg bg-white p-1 text-[10px] font-bold">{["Preview", "Mockup", "Cetak"].map((mode) => <button key={mode} onClick={() => setView(mode)} className={"rounded-md px-2.5 py-2 " + (view === mode ? "bg-[#17613b] text-white" : "text-[#65564e]")}>{mode}</button>)}</div></div><div className="mb-2 flex items-center justify-between gap-2 rounded-lg bg-white px-2 py-1.5"><span className="text-[10px] font-semibold text-[#786b70]">Perbesar / perkecil preview</span><div className="flex items-center gap-1"><button type="button" onClick={() => setPreviewZoom((z) => Math.max(0.5, Math.round((z - 0.1) * 10) / 10))} aria-label="Zoom out" title="Zoom out" className="flex size-8 items-center justify-center rounded-md border border-[#e8dfd8] text-[#65452e] hover:bg-[#fff7eb]"><ZoomOut className="size-4"/></button><span className="w-12 text-center text-[10px] font-bold tabular-nums text-[#65452e]">{Math.round(previewZoom * 100)}%</span><button type="button" onClick={() => setPreviewZoom((z) => Math.min(2.5, Math.round((z + 0.1) * 10) / 10))} aria-label="Zoom in" title="Zoom in" className="flex size-8 items-center justify-center rounded-md border border-[#e8dfd8] text-[#65452e] hover:bg-[#fff7eb]"><ZoomIn className="size-4"/></button><button type="button" onClick={() => setPreviewZoom(1)} className="rounded-md px-2 py-2 text-[10px] font-bold text-[#17613b] hover:bg-[#f4f7f4]">Reset</button></div></div><div className={"max-h-[75vh] overflow-auto rounded-lg p-3 " + (view === "Cetak" ? "bg-white" : view === "Mockup" ? "bg-gradient-to-br from-[#35241a] via-[#5c4030] to-[#21160f]" : "bg-[#e8e2ed]")}><div className={"flex min-w-max justify-center " + (view === "Mockup" ? "rounded-[28px] bg-[#4b3528] p-8 shadow-inner" : "p-1")}><canvas ref={previewCanvas} className={"block h-auto max-w-none " + (view === "Mockup" ? "rounded-lg shadow-2xl ring-4 ring-[#b98a42]" : view === "Cetak" ? "rounded-none shadow-none" : "rounded-md shadow-xl")} style={{ width: `${310 * previewZoom}px`, aspectRatio: "1 / 5" }}/></div></div><div className="mt-3 flex items-center justify-between text-[10px] text-[#786b70]"><span>{view === "Cetak" ? "Simulasi hasil cetak" : view === "Mockup" ? "Simulasi label pada koper" : "Desain label digital"}</span><span className="flex items-center gap-1"><Palette className="size-3"/>Live update</span></div></section>
         </div>
         <div className="sticky bottom-3 z-20 mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#ead8bd] bg-white/95 p-3 shadow-xl backdrop-blur"><div className="flex flex-wrap gap-2"><button onClick={cancel} className="inline-flex items-center gap-2 rounded-xl border border-[#d9a44f] px-4 py-3 text-xs font-bold text-[#88551c]"><X className="size-4"/>Batal</button><button onClick={restore} className="inline-flex items-center gap-2 rounded-xl border border-[#d9a44f] px-4 py-3 text-xs font-bold text-[#88551c]"><RotateCcw className="size-4"/>Restore Default</button></div><div className="flex flex-wrap gap-2"><button onClick={save} className="inline-flex items-center gap-2 rounded-xl bg-[#17613b] px-5 py-3 text-xs font-bold text-white"><Save className="size-4"/>{saved ? "Tersimpan" : "Simpan Perubahan"}</button><button onClick={() => window.print()} className="inline-flex items-center gap-2 rounded-xl border border-[#d9a44f] px-4 py-3 text-xs font-bold text-[#70421d]"><Printer className="size-4"/>Cetak</button><button onClick={download} className="inline-flex items-center gap-2 rounded-xl border border-[#d9a44f] px-4 py-3 text-xs font-bold text-[#70421d]"><Download className="size-4"/>Download PNG</button><button onClick={share} className="inline-flex items-center gap-2 rounded-xl bg-[#159b58] px-4 py-3 text-xs font-bold text-white"><MessageCircle className="size-4"/>Share WhatsApp</button></div></div>
         <p className="mt-4 text-center text-[10px] text-[#a18b7d]">Jamaah Identity & Label Center · Data terhubung ke Supabase produksi.</p>
