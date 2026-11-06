@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { JamaahDatabase } from "@/lib/jamaah.types";
 import { LabelCenterModules } from "@/components/label-center-modules";
+import { renderLabelKoper } from "@/lib/label-koper-renderer";
 
 type PublicJamaah = {
   id: string;
@@ -92,103 +93,14 @@ function PublicLabelCenterPage() {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const image = new Image();
-    image.src = "/assets/label-koper-template.png";
-    image.onload = () => {
-      const ctx = canvas.getContext("2d", { willReadFrequently: true });
-      if (!ctx) return;
-      canvas.width = image.naturalWidth;
-      canvas.height = image.naturalHeight;
-      ctx.drawImage(image, 0, 0);
-      const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const rgb = draft.color.match(/[0-9a-f]{2}/gi)?.map((v) => parseInt(v, 16)) ?? [];
-      const [cr = 182, cg = 166, cb = 213] = rgb;
-      const px = pixels.data;
-      for (let i = 0; i < px.length; i += 4) {
-        const r = px[i] ?? 0, g = px[i + 1] ?? 0, b = px[i + 2] ?? 0;
-        if (b > r * 1.04 && b > g * 1.02 && r > 135 && g > 115 && b > 150 && r - g < 45) {
-          px[i] = cr; px[i + 1] = cg; px[i + 2] = cb;
-        }
-      }
-      ctx.putImageData(pixels, 0, 0);
-      // Geometry below is measured directly from the official template
-      // artwork (600 x 3960). Each editable field is drawn exactly once in
-      // the band where the baked-in sample data sits, so nothing overlaps.
-      const mask = (x0: number, y0: number, x1: number, y1: number) => {
-        ctx.fillStyle = "#2b1505";
-        ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
-      };
-      mask(40, 3264, 560, 3374); // "BARANG INI MILIK :" + nomor label
-      mask(60, 3416, 560, 3660); // nama jamaah (maks. 3 baris)
-      mask(50, 3786, 560, 3834); // tour leader
-      mask(152, 3858, 560, 3908); // nomor WhatsApp (ikon WA asli tetap)
-
-      ctx.textBaseline = "alphabetic";
-      const cream = "#f1e2ca";
-
-      ctx.textAlign = "left";
-      ctx.fillStyle = cream;
-      ctx.font = "700 34px Arial, sans-serif";
-      ctx.fillText("BARANG INI", 49, 3308);
-      ctx.fillText("MILIK :", 50, 3347);
-
-      ctx.textAlign = "right";
-      ctx.fillStyle = "#f3ca71";
-      ctx.font = "700 118px Arial, sans-serif";
-      ctx.fillText(draft.number || "—", 552, 3364, 128);
-
-      ctx.textAlign = "left";
-      ctx.fillStyle = cream;
-      const words = (draft.name || "NAMA JAMAAH").trim().split(/\s+/);
-      const nameWidth = 478;
-      let lines: string[] = [];
-      let fontSize = 66;
-      for (const size of [66, 61, 56, 50, 45, 40, 36]) {
-        ctx.font = "700 " + size + "px Arial, sans-serif";
-        lines = [];
-        let line = "";
-        for (const word of words) {
-          const next = line ? line + " " + word : word;
-          if (ctx.measureText(next).width > nameWidth && line) { lines.push(line); line = word; }
-          else line = next;
-        }
-        if (line) lines.push(line);
-        fontSize = size;
-        if (lines.length <= 3) break;
-      }
-      const nameTop = 3484;
-      const lineHeight = 80;
-      lines.slice(0, 3).forEach((line, index) => ctx.fillText(line, 84, nameTop + index * lineHeight));
-
-      ctx.fillStyle = cream;
-      ctx.font = "700 30px Arial, sans-serif";
-      ctx.fillText("TL : " + (draft.leader || "—"), 63, 3820, 480);
-      ctx.font = "700 34px Arial, sans-serif";
-      ctx.fillText(draft.phone || "—", 159, 3897, 392);
-
-      // Kotak kamar berada di bagian atas label yang tercetak terbalik
-      // (rancangan asli template), jadi teksnya juga digambar terbalik.
-      const drawRoom = (value: string, cy: number) => {
-        const text = value.trim();
-        if (!text) return;
-        ctx.save();
-        ctx.translate(296, cy);
-        ctx.rotate(Math.PI);
-        ctx.textAlign = "center";
-        ctx.fillStyle = "#35190d";
-        let roomSize = 58;
-        for (const size of [58, 52, 46, 40, 34]) {
-          ctx.font = "italic 700 " + size + "px Georgia, serif";
-          roomSize = size;
-          if (ctx.measureText(text).width <= 400) break;
-        }
-        ctx.fillText(text, 0, Math.round(roomSize * 0.36));
-        ctx.restore();
-      };
-      drawRoom(draft.makkah, 548);
-      drawRoom(draft.madinah, 868);
-    };
-    image.onerror = () => setError("Template label koper tidak dapat dimuat.");
+    return renderLabelKoper(canvas, {
+      name: draft.name,
+      number: draft.number,
+      leader: draft.leader,
+      phone: draft.phone,
+      makkah: draft.makkah,
+      madinah: draft.madinah,
+    }, setError);
   }, [draft]);
 
   const download = () => {
@@ -275,7 +187,7 @@ function PublicLabelCenterPage() {
           <section className="min-w-0 rounded-2xl bg-[#eeebef] p-4 shadow-sm sm:p-5">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2"><h2 className="text-sm font-bold text-black">Preview</h2><span className="text-[10px] font-semibold text-[#786b70]">Scroll untuk menggeser area</span></div>
             <div className="mb-2 flex items-center justify-between gap-2 rounded-lg bg-white px-2 py-1.5"><span className="text-[10px] font-semibold text-[#786b70]">Zoom preview</span><div className="flex items-center gap-1"><button type="button" onClick={() => setPreviewZoom((z) => Math.max(0.5, Math.round((z - 0.1) * 10) / 10))} aria-label="Zoom out" title="Zoom out" className="flex size-8 items-center justify-center rounded-md border border-[#e8dfd8] text-[#65452e] hover:bg-[#fff7eb]"><ZoomOut className="size-4"/></button><span className="w-12 text-center text-[10px] font-bold tabular-nums text-[#65452e]">{Math.round(previewZoom * 100)}%</span><button type="button" onClick={() => setPreviewZoom((z) => Math.min(2.5, Math.round((z + 0.1) * 10) / 10))} aria-label="Zoom in" title="Zoom in" className="flex size-8 items-center justify-center rounded-md border border-[#e8dfd8] text-[#65452e] hover:bg-[#fff7eb]"><ZoomIn className="size-4"/></button><button type="button" onClick={() => setPreviewZoom(1)} className="rounded-md px-2 py-2 text-[10px] font-bold text-[#17613b] hover:bg-[#f4f7f4]">Reset</button></div></div>
-            <div className="max-h-[75vh] overflow-auto rounded-xl bg-white/70 p-3"><div className="flex min-w-max justify-center"><canvas ref={canvasRef} className="block h-auto max-w-none" style={{ width: `${600 * previewZoom}px` }} aria-label="Preview label koper sesuai template resmi" /></div></div>
+            <div className="max-h-[75vh] overflow-auto rounded-xl bg-white/70 p-3"><div className="flex min-w-max justify-center"><canvas ref={canvasRef} className="block h-auto max-w-none" style={{ width: `${400 * previewZoom}px`, aspectRatio: "1 / 5" }} aria-label="Preview label koper sesuai template resmi" /></div></div>
             <p className="mt-4 text-center text-xs font-semibold text-[#5f4a3a]">{draft.name || "Nama jamaah"} · No. {draft.number || "-"}</p>
           </section>
         </div>
